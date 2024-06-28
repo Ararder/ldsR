@@ -1,11 +1,11 @@
 Package: ldsR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: An R implementation of LDscore regression (LDSC)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Arvid harder
+Maintainer: Arvid Harder <arvid.harder@gmail.com>
+Description: An implemnentation of the classical LDscore regression software in R. 
+  The pacakge supports estimating heritability and partitioned heritability.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
