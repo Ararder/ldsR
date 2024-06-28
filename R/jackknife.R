@@ -1,18 +1,3 @@
-updated_jackknife <- function(x,y,separators=NULL, n_blocks=200) {
-  stopifnot("matrix" %in% class(x))
-  stopifnot(is.numeric(y))
-  rlang::check_required(x)
-  rlang::check_required(y)
-  n_snps <- dim(x)[1]
-  n_annot <- dim(x)[2]
-  stopifnot(length(y) == n_snps)
-  if(is.null(separators)) {
-    separators <- floor(seq(0, dim(x)[1], length.out = 200 + 1))
-  }
-
-
-
-}
 lstq_jackknife <- function(x, y, n_blocks = 200,separators = NULL) {
 
   stopifnot("matrix" %in% class(x))
@@ -28,20 +13,19 @@ lstq_jackknife <- function(x, y, n_blocks = 200,separators = NULL) {
   }
 
 
-
   blocks <- get_blocks(n_snps, n_blocks, separators)
-  block_values <- compute_block_values(x,y, blocks)
-  # compute full estimates
-  full_XtX <- purrr::reduce(purrr::map(block_values, "XtX"), `+`)
-  full_Xy <- purrr::reduce(purrr::map(block_values, "Xy"), `+`)
+  XtX <- purrr::map(blocks, \(b) t(x[b,]) %*% x[b,])
+  Xy <- purrr::map(blocks, \(b) crossprod(x[b,], y[b]))
+  full_XtX <- purrr::reduce(XtX, `+`)
+  full_Xy <- purrr::reduce(Xy, `+`)
   est <- t(solve(full_XtX, full_Xy))
 
 
   # iterate over the block_values, removing XtX.block from XtX.tot: equivalent to leave-a-block-out jackknife
   delete_values <-
-    purrr::map(block_values, \(block) {
-      XtX <-  full_XtX - block$XtX
-      Xy <-  full_Xy - block$Xy
+    purrr::map2(XtX, Xy, \(XtX_sub, Xy_sub) {
+      XtX <-  full_XtX - XtX_sub
+      Xy <-  full_Xy - Xy_sub
       solve(XtX, Xy)
     })
 
@@ -61,13 +45,10 @@ lstq_jackknife <- function(x, y, n_blocks = 200,separators = NULL) {
 
 
 
-
 }
 
 
 get_blocks <- function(n_snps, n_blocks, s) {
-
-
   # shift the separators to the right by 1, python is 0 based, R is 1 based
   s <- s + 1
 
@@ -82,22 +63,13 @@ get_blocks <- function(n_snps, n_blocks, s) {
 }
 
 
-compute_block_values <- function(x,y, blocks) {
-
-  purrr::map(blocks, \(block) list(
-      XtX = t(x[block,]) %*% x[block, ],
-      Xy = crossprod(x[block, ], y[block])
-    ))
-
-}
-
 delete_values_to_pseudovalues <- function(delete_values, est) {
   stopifnot("matrix" %in% class(delete_values))
   n_blocks <- nrow(delete_values)
   p <- ncol(delete_values)
   stopifnot(length(est) == p)
 
-  # a little big of extra code to match dimensions
+  # a little bit of extra code to match dimensions
   est_matrix <- matrix(ncol = p, nrow = n_blocks)
   for(i in 1:n_blocks) est_matrix[i, ] <- est
 
@@ -167,50 +139,69 @@ extract_jackknife <- function(jknife, Nbar, M) {
 
 }
 
-slow_jackknife <- function(x, y, n_blocks = 200) {
 
-  stopifnot("matrix" %in% class(x))
-  stopifnot(is.numeric(y))
-  rlang::check_required(x)
-  rlang::check_required(y)
-
-  n_snps <- dim(x)[1]
-  n_annot <- dim(x)[2]
-  stopifnot(length(y) == n_snps)
-
-
-
-  # setup up jackknife blocks
-  blocks <- sort(rep_len(seq_len(n_blocks), n_snps))
-  ind_blocks <- split(seq_along(blocks), blocks)
-  h_blocks <- n_snps / lengths(ind_blocks)
-
-  # keep all rows not in ind_blocks for y
-
-
-  # iterate over each block, calculating XtX and Xy
-  block_values <- purrr::map(
-    ind_blocks, \(block) {
-
-      XtX = t(x[-block,]) %*% x[-block, ]
-      Xy = crossprod(x[-block, ], y[-block])
-      solve(XtX, Xy)
-
-      }
-    )
-
-
-  # clean up formatting and extract estimates
-  delete_values <- purrr::reduce(delete_values, cbind) |> t()
-  pseudo <- delete_values_to_pseudovalues(delete_values, est)
-  res <- jackknife(pseudo)
-
-  # return both pseudo and delete values
-  res$pseudo <- pseudo
-  res$delete_values <- delete_values
-
-  res
+# -------------------------------------------------------------------------
+# efforts to memoise cell-type analysis
+# compute_M_T_M <- function(y, x, w, N, M, n_blocks=200) {
+#   rlang::check_required(y)
+#   rlang::check_required(x)
+#   rlang::check_required(w)
+#   rlang::check_required(N)
+#   rlang::check_required(M)
+#   stopifnot(rlang::is_double(y))
+#   stopifnot(rlang::is_double(x))
+#   stopifnot(rlang::is_double(w))
+#   stopifnot(rlang::is_double(N))
+#   stopifnot(rlang::is_double(M))
+#   stopifnot(rlang::is_integerish(n_blocks))
+#
+#
+#   n_snps <- dim(x)[1]
+#   n_annot <- dim(x)[2]
+#   M_tot <- sum(M)
+#   stopifnot(length(M) == n_annot)
+#   x_tot <- rowSums(x)
+#
+#   # provide a starting estimate of heritability
+#   hsq <- M_tot * (mean(y) - 1) / mean((x_tot * N))
+#   initial_w <- get_weights(ld = x_tot, w_ld = w, N = N, M = M_tot, hsq = hsq)
+#   Nbar <- mean(N)
+#   x <- (N*x) / Nbar
+#   x <- cbind(1, x)
+#   initial_w = sqrt(initial_w)
+#   initial_w = initial_w / sum(initial_w)
+#
+#   x_weighted <- x*initial_w
+#   y_weighted <- y*initial_w
+#   separators <- floor(seq(0, n_snps, length.out = n_blocks + 1))
+#   blocks <- get_blocks(n_snps, n_blocks, separators)
+#   compute_xtx(x, blocks)
+#
+#
+# }
 
 
+# compute_xtx <- function(x, blocks, M_T_M = NULL) {
+#   if(is.null(M_T_M)) {
+#     purrr::map(blocks, \(b) t(x[b,]) %*% x[b,])
+#   } else {
+#     j <- x[,ncol(x)]
+#     M <- x[, -ncol(x)]
+#     stopifnot(length(blocks) == length(M_T_M))
+#     purrr::map2(blocks, M_T_M, \(b, m) memoised_xtx(M = M[b,], j = j[b], M_T_M = m))
+#   }
+# }
+#
+# memoised_xtx <- function(M, j, M_T_M) {
+#
+#   MTj <- t(M) %*% j
+#   jTj <- t(j) %*% j
+#
+#   rbind(
+#     cbind(M_T_M, MTj),
+#     cbind(t(MTj), jTj)
+#   )
+#
+# }
 
-}
+

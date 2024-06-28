@@ -1,4 +1,27 @@
+utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z"))
 req_cols <- c("SNP", "Z", "N")
+
+#' Estimate SNP heritability using LDscore regression
+#'
+#' @description
+#' An R implementation of the LD score regression method to estimate SNP heritability,
+#' which should produce identical results to ldsc.py --h2 command.
+#' The package uses by default the eur_w_ld scores from the LDSC tutorial.
+#'
+#' The function does not apply any quality control checks, and assumes everything is in order.
+#'
+#'
+#' @param sumstat A data.frame or tbl with columns `SNP`, `Z` and `N`
+#' @param weights Optional, a data.frame or tbl with columns `SNP`, `L2`
+#' @param M Optional, the number of SNPs in the reference panel
+#' '
+#'
+#' @return a [dplyr::tibble()] with columns `h2` and `h2_se`
+#' @export
+#'
+#' @examples \dontrun{
+#' ldsc_h2(my_gwas)
+#' }
 ldsc_h2 <- function(sumstat, weights=NULL, M=NULL) {
   stopifnot("sumstat has to be a data.frame or tbl" = "data.frame" %in% class(sumstat))
   stopifnot("SNP, Z and N are required in `sumstat`" = all(req_cols %in% colnames(sumstat)))
@@ -25,25 +48,26 @@ ldsc_h2 <- function(sumstat, weights=NULL, M=NULL) {
 
 
 }
-ldsc_rg <- function(){
-
-}
 
 celltype_analysis <- function(sumstat, weights, baseline_ldscores,baseline_M, celltype_ldscores, celltype_M) {
   stopifnot("SNP, Z and N are required in `sumstat`" = all(req_cols %in% colnames(sumstat)))
   # stopifnot(all(file.exists(c(weights, baseline_ldscores, celltype_ldscores))))
 
-  sumstat <- dplyr::select(sumstat, dplyr::all_of(req_cols)) |>
-    tidyr::drop_na()
-  w <- dplyr::arrange(weights, CHR, BP) |>
-    dplyr::select(dplyr::all_of(c("SNP", "L2")))
+  sumstat <- dplyr::select(sumstat, dplyr::all_of(req_cols))
 
-  merged <- dplyr::inner_join(w, sumstat, by = "SNP") |>
+  merged <- dplyr::inner_join(weights, sumstat, by = "SNP") |>
     dplyr::inner_join(baseline_ldscores, by = "SNP") |>
-    dplyr::inner_join(celltype_ldscores, by = "SNP") |>
+    dplyr::inner_join(celltype_ldscores, by = "SNP")
 
-  non_ldscores <- c(colnames(sumstat),colnames(w))
+  non_ldscores <- c(colnames(sumstat),colnames(weights))
   celltype_ldscore_names <-  colnames(dplyr::select(celltype_ldscores, -SNP))
+
+  M <- dplyr::bind_rows(baseline_M) |> dplyr::pull(m50)
+  y <- merged$Z^2
+  x <- dplyr::select(merged,-dplyr::all_of(c(non_ldscores, celltype_ldscore_names))) |> as.matrix()
+  w <- merged$L2
+  N <- merged$N
+
 
 
   res <- purrr::map(celltype_ldscore_names, \(celltype)

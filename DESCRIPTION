@@ -6,10 +6,11 @@ Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
+    stringr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
@@ -19,3 +20,5 @@ Imports:
     purrr,
     rlang
 RoxygenNote: 7.2.3
+URL: https://github.com/Ararder/ldsR
+BugReports: https://github.com/Ararder/ldsR/issues

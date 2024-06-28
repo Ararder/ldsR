@@ -5,9 +5,8 @@ test_that("ldsc_h2 runs", {
   gwas <- arrow::read_parquet(test_path("fixtures/move/speed_scz2022_eur.parquet"), col_select = c("SNP", "Z","N")) |>
     dplyr::mutate(SNP = stringr::str_c("rs", as.integer(SNP)))
 
-  tictoc::tic()
+
   ldsc_h2(gwas)
-  tictoc::toc()
 
 
 })

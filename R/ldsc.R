@@ -48,14 +48,14 @@ ldscore <- function(
 
   } else if(n_annot > 1) {
 
-    multivariate_ldsc(
-      y = y,
-      x = x,
-      initial_w = initial_w,
-      Nbar = Nbar,
-      M = M,
-      n_blocks = n_blocks
-    )
+    initial_w = sqrt(initial_w)
+    initial_w = initial_w / sum(initial_w)
+    x_weighted <- x*initial_w
+    y_weighted <- y*initial_w
+    jackknife = lstq_jackknife(x = x_weighted, y = y_weighted, n_blocks = n_blocks)
+    extract_jackknife(jackknife, M = M, Nbar = Nbar)
+
+
   }
 
 
@@ -91,28 +91,13 @@ univariate_ldsc <- function(y, x, x_tot,w, N, initial_w, M, Nbar,twostep=30) {
   step2_res <- lstq_jackknife(as.matrix(tmp$x), tmp$y, separators = updated_s)
   jknife <- combine_twostep_jknives(step1_res, step2_res, M, c, Nbar)
 
-  res <- extract_jackknife(jknife, Nbar, M)
-
-# done --------------------------------------------------------------------
-
-
-  res
-
+  extract_jackknife(jknife, Nbar, M)
 
 
 
 }
 
-multivariate_ldsc <- function(y, x, initial_w, Nbar, M, n_blocks = 200) {
-  initial_w = sqrt(initial_w)
-  initial_w = initial_w / sum(initial_w)
-  x_weighted <- x*initial_w
-  y_weighted <- y*initial_w
-  jackknife = lstq_jackknife(x = x_weighted, y = y_weighted, n_blocks = n_blocks)
 
-  extract_jackknife(jackknife, M = M, Nbar = Nbar)
-
-}
 
 combine_twostep_jknives <- function(step1_res, step2_res, M, c, Nbar) {
 
