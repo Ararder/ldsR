@@ -90,8 +90,11 @@ univariate_ldsc <- function(y, x, x_tot,w, N, initial_w, M, Nbar,twostep=30) {
   tmp <- iterated_weights(x = x, y = yp, w = initial_w, update_function = update_function2)
   step2_res <- lstq_jackknife(as.matrix(tmp$x), tmp$y, separators = updated_s)
   jknife <- combine_twostep_jknives(step1_res, step2_res, M, c, Nbar)
+  results <- extract_jackknife(jknife, Nbar, M)
+  results[["int"]] <- step1_int
+  results[["int_se"]] <- step1_res$se[1]
+  results
 
-  extract_jackknife(jknife, Nbar, M)
 
 
 

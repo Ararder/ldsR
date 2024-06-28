@@ -44,7 +44,12 @@ ldsc_h2 <- function(sumstat, weights=NULL, M=NULL) {
     M = M
   )
 
-  dplyr::tibble(h2 = results$tot, h2_se = results$tot_se)
+  dplyr::tibble(
+    h2 = results$tot, h2_se = results$tot_se,
+    int = results$int, int_se = results$int_se,
+    mean_chi2 = mean(merged$Z^2),
+    lambda_gc = stats::median(merged$Z^2) / 0.4549
+    )
 
 
 }

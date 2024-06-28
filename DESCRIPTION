@@ -18,7 +18,8 @@ Imports:
     dplyr,
     fs,
     purrr,
-    rlang
+    rlang,
+    stats
 RoxygenNote: 7.2.3
 URL: https://github.com/Ararder/ldsR
 BugReports: https://github.com/Ararder/ldsR/issues
