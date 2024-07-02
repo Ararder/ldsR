@@ -32,28 +32,3 @@ test_that("rg_update_function runs", {
     )
   )
 })
-
-
-
-# test_that("Ratio jackknife works", {
-#   list <- list(
-#     "rg_ratio" = rg_ratio,
-#     "gencov_tot_delete_values" = gencov_tot_delete_values,
-#     "denom" = denom
-#     )
-#   ll <- readr::read_rds("~/ratio_jknife_tdata.rds")
-#   est <- ll$rg_ratio
-#   denom <- ll$denom
-#   numer <- ll$gencov_tot_delete_values
-#   n_blocks <- 200
-#   pseudovalues <- vector("numeric", n_blocks)
-#   for(j in 1:n_blocks){
-#     pseudovalues[j] <- n_blocks * est - (n_blocks - 1) * numer[j] / denom[j]
-#     # print(pseudovalues[j])
-#   }
-#
-#   final <- jackknife(matrix(pseudovalues))
-#
-#
-#
-# })

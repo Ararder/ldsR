@@ -15,11 +15,12 @@ Suggests:
 Config/testthat/edition: 3
 Imports: 
     arrow,
+    cli,
     dplyr,
     fs,
     purrr,
     rlang (>= 1.1.0),
     stats
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2.9000
 URL: https://github.com/Ararder/ldsR
 BugReports: https://github.com/Ararder/ldsR/issues

@@ -14,7 +14,7 @@ ldscore <- function(
   stopifnot(rlang::is_double(N))
   stopifnot(rlang::is_double(M))
   stopifnot(rlang::is_integerish(n_blocks))
-  stopifnot(all(purrr::map_dbl(list(x,w,N), length) == nrow(x)))
+  stopifnot(all(purrr::map_dbl(list(y,w,N), length) == nrow(x)))
   n_snp <- dim(x)[1]
   n_annot <- dim(x)[2]
   M_tot <- sum(M)

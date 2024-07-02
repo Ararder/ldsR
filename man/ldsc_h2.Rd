@@ -11,8 +11,7 @@ ldsc_h2(sumstat, weights = NULL, M = NULL)
 
 \item{weights}{Optional, a data.frame or tbl with columns `SNP`, `L2`}
 
-\item{M}{Optional, the number of SNPs in the reference panel
-'}
+\item{M}{Optional, the number of SNPs in the reference panel}
 }
 \value{
 a [dplyr::tibble()] with columns `h2` and `h2_se`

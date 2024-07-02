@@ -1,22 +1,22 @@
-check_is_path() <- function(path) {
-  rlang::is_scalar_character(path)
-  # OBS: add more informative path
-  stopifnot(file.exists(path))
+# check_is_path() <- function(path) {
+#   rlang::is_scalar_character(path)
+#   # OBS: add more informative path
+#   stopifnot(file.exists(path))
+
+# }
+
+
 
 }
 
-parse_covariate_ldscores <- function() {
+
+
+
+parse_gwas <- function(path, ldsc_munge = TRUE) {
 
 }
 
 
-parse_gwas <- function() {
-
-}
-
-parse_other_ldscores <- function() {
-
-}
 
 
 
@@ -24,7 +24,10 @@ parse_parquet_dir <- function(dir) {
   ld <- arrow::read_parquet(paste0(dir, "/ld.parquet"))
   annot <- arrow::read_parquet(paste0(dir, "/annot.parquet"))
 
-  list(ld, annot)
+  list(
+    "ld" = ld,
+    "annot" = annot
+  )
 }
 
 

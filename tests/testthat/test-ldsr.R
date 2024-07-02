@@ -1,16 +1,34 @@
 
 test_that("celltype_ldsc works", {
   skip()
-  sumstat <- arrow::read_parquet(test_path("fixtures/move/speed_scz2022_eur.parquet"), col_select = c("SNP", "Z","N"))
-  weights <- arrow::read_parquet(test_path("fixtures/move/weights2.parquet"), col_select = c("SNP", "L2"))
-  baseline_ldscores <- arrow::read_parquet(test_path("fixtures/move/ld.parquet"))
-  baseline_M <- arrow::read_parquet(test_path("fixtures/move/annot.parquet"))
-  celltype_ldscores <- arrow::read_parquet(test_path("fixtures/superclusters/ld.parquet")) |>
-    dplyr::mutate(SNP = stringr::str_remove(SNP, "rs") |> as.numeric())
-  celltype_M <- arrow::read_parquet(test_path("fixtures/superclusters/annot.parquet"))
-
+  
+  
+  sumstat <- arrow::read_parquet(test_path("fixtures/test_data.parquet"), col_select = c("SNP", "Z" ="Z.x", "N" = "N.x")) |>
+    dplyr::select(dplyr::all_of(c("SNP", "Z" ="Z.x", "N" = "N.x")))
+  covariate_dir <- "~/projects/move"
+  celltype_dir <- "~/projects/move/superclusters/"  
+  weights = NULL
+  
 
 })
+
+
+test_that("Genetic correlatios works", {
+  
+  
+  sumstat <- arrow::read_parquet(test_path("fixtures/test_data.parquet"))
+  
+  s1 <- dplyr::select(sumstat, SNP, Z = Z.x, N = N.x)
+  s2 <- dplyr::select(sumstat, SNP, Z = Z.y, N = N.y)
+  
+  expect_no_error(test <- ldsc_rg(s1,s2))
+  
+  
+
+})
+
+
+
 
 
 
