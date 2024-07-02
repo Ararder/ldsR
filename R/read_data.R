@@ -1,39 +1,24 @@
-parse_parquet <- function(gwas, ldscores, weights) {
-  stopifnot(fs::dir_exists(ldscores))
-  stopifnot(fs::file_exists(gwas))
-  stopifnot(fs::file_exists(weights))
-
-  g <- arrow::read_parquet(gwas, col_select = c("SNP", "Z", "N"))
-  w <- arrow::read_parquet(weights, col_select = c("SNP", "L2"))
-
-  unpack <- parse_parquet_dir(dir)
-  ld <- unpack[[1]]
-  annot <- unpack[[2]]
-  rm(unpack)
-
-
-  merged <- dplyr::inner_join(g, w, by = "SNP") |>
-    dplyr::inner_join(ld, by = "SNP")
-
-  remove <- c(colnames(g), colnames(w))
-
-  y <- merged$Z^2
-  x <- dplyr::select(merged,-dplyr::all_of(remove)) |> as.matrix()
-  w <- merged$L2
-  N <- merged$N
-  M <- annot$m50
-
-  list(
-    y = y,
-    x = x,
-    w = w,
-    N = N,
-    M = M
-  )
-
-
+check_is_path() <- function(path) {
+  rlang::is_scalar_character(path)
+  # OBS: add more informative path
+  stopifnot(file.exists(path))
 
 }
+
+parse_covariate_ldscores <- function() {
+
+}
+
+
+parse_gwas <- function() {
+
+}
+
+parse_other_ldscores <- function() {
+
+}
+
+
 
 parse_parquet_dir <- function(dir) {
   ld <- arrow::read_parquet(paste0(dir, "/ld.parquet"))
@@ -42,7 +27,9 @@ parse_parquet_dir <- function(dir) {
   list(ld, annot)
 }
 
-# dir = "~/Downloads/superclusters/amygdala_excitatory/"
+
+#
+# CONVERT LDSC file structure to parquet
 ldsc_to_parquet <- function(dir, annot_name) {
   ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
     purrr::map(arrow::read_tsv_arrow, col_select = c("SNP", "L2")) |>
@@ -79,3 +66,4 @@ tidy_results <- function(res) {
     dplyr::arrange(dplyr::desc(abs(z)))
 
 }
+

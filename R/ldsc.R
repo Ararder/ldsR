@@ -9,16 +9,16 @@ ldscore <- function(
   rlang::check_required(M)
   stopifnot(rlang::is_double(y))
   stopifnot(rlang::is_double(x))
+  stopifnot("matrix" %in% class(x))
   stopifnot(rlang::is_double(w))
   stopifnot(rlang::is_double(N))
   stopifnot(rlang::is_double(M))
   stopifnot(rlang::is_integerish(n_blocks))
-
-
+  stopifnot(all(purrr::map_dbl(list(x,w,N), length) == nrow(x)))
   n_snp <- dim(x)[1]
   n_annot <- dim(x)[2]
   M_tot <- sum(M)
-  stopifnot(length(M) == n_annot)
+  stopifnot("The number of annotations in x should be equal to the of M" = length(M) == n_annot)
   x_tot <- rowSums(x)
 
   # provide a starting estimate of heritability
@@ -64,35 +64,30 @@ ldscore <- function(
 univariate_ldsc <- function(y, x, x_tot,w, N, initial_w, M, Nbar,twostep=30) {
 
 
-  yp <- y
   ii <- y < twostep
-  x1 <- x[ii, ]
-  n1 <- sum(ii)
-  yp1 <- yp[ii]
-  w1 <- w[ii]
-  N1 <- N[ii]
-  initial_w1 <- initial_w[ii]
-
+  x1 <- x[ii,]
   # run two rounds of iterated weighted linear regression to improve weight
-  update_func1 <- function(x) update_func(x, ld_tot = x1, w_ld = w1, N = N1, M = M, Nbar = Nbar)
-  tmp <- iterated_weights(x = x1, y = yp1, w = initial_w1, update_function = update_func1)
+  update_func1 <- function(x) update_func(x, x1, w[ii],  N[ii], M, Nbar)
+  tmp <- iterated_weights(x = x1, y = y[ii], w = initial_w[ii], update_function = update_func1)
   step1_res <- lstq_jackknife(tmp$x, tmp$y)
   step1_int <- step1_res$full_est[1]
 
   # estimate h2, with pre-estimated intercept --------------------------------
 
   updated_s <- update_separators(step1_res$separators, ii)
-  yp <- y - step1_int
+  y <- y - step1_int
   x <- x[, 2]
   c <- sum(initial_w * x) / sum(initial_w * x^2)
 
   update_function2 <- function(x) update_func(x, x_tot, w, N, M, Nbar, step1_int)
-  tmp <- iterated_weights(x = x, y = yp, w = initial_w, update_function = update_function2)
+  tmp <- iterated_weights(x = x, y = y, w = initial_w, update_function = update_function2)
   step2_res <- lstq_jackknife(as.matrix(tmp$x), tmp$y, separators = updated_s)
+
   jknife <- combine_twostep_jknives(step1_res, step2_res, M, c, Nbar)
   results <- extract_jackknife(jknife, Nbar, M)
   results[["int"]] <- step1_int
   results[["int_se"]] <- step1_res$se[1]
+  results[["delete_values"]] <- jknife$delete_values
   results
 
 
@@ -149,13 +144,8 @@ update_func <- function(wls, ld_tot, w_ld, N, M, Nbar, intercept = NULL) {
 # -------------------------------------------------------------------------
 
 get_weights <- function(ld, w_ld, N, M, hsq, intercept=1) {
-  stopifnot(!"matrix" %in% class(ld))
-  stopifnot(!"w_ld" %in% class(ld))
-  stopifnot(is.numeric(N))
-  stopifnot(is.numeric(M))
-  stopifnot(is.numeric(hsq))
 
-  # hsq is bounded between 0 and 1
+  # hsq bounded between 1, minimum weight value is 1.
   hsq = max(hsq, 0.0)
   hsq = min(hsq, 1.0)
   ld = pmax(ld, 1)
@@ -172,7 +162,7 @@ get_weights <- function(ld, w_ld, N, M, hsq, intercept=1) {
 
 wls <- function(x,y,w) {
 
-  # normalize weights, and weight x and y by w
+  # normalize weights, weight x and y by w
   w_norm <- (w / sum(w))
   x = w_norm * x
   y = w_norm * y
@@ -194,8 +184,8 @@ iterated_weights <- function(x,y,w, update_function) {
     new_w <- sqrt(updated)
     w <- new_w
   }
-
   w_norm <- (w / sum(w))
+
   list(
     x = w_norm * x,
     y = w_norm * y
