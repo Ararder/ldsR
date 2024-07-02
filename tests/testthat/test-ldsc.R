@@ -20,6 +20,16 @@ test_that("ldsc_h2 runs and reproduces LDSC for bip", {
 
 })
 
+#
+
+test_that("benchmarking", {
+  skip()
+  profvis::profvis(res <- ldsc_h2(dplyr::select(testdata, SNP, Z = Z.y, N = N.y)))
+  
+  
+
+
+})
 
 
 

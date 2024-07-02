@@ -23,3 +23,8 @@ a [dplyr::tibble()]
 \description{
 Compute the genetic correlation between two traits
 }
+\examples{
+\dontrun{
+ldsc_rg(s1, s2)
+}
+}

@@ -66,9 +66,13 @@ univariate_ldsc <- function(y, x, x_tot,w, N, initial_w, M, Nbar,twostep=30) {
 
   ii <- y < twostep
   x1 <- x[ii,]
+  y1 = y[ii]
+  w1 = w[ii]
+  N1 <- N[ii]
+  initial_w1 <- initial_w[ii]
   # run two rounds of iterated weighted linear regression to improve weight
-  update_func1 <- function(x) update_func(x, x1, w[ii],  N[ii], M, Nbar)
-  tmp <- iterated_weights(x = x1, y = y[ii], w = initial_w[ii], update_function = update_func1)
+  update_func1 <- function(x) update_func(x, x1, w1,  N1, M, Nbar)
+  tmp <- iterated_weights(x = x1, y = y1, w = initial_w1, update_function = update_func1)
   step1_res <- lstq_jackknife(tmp$x, tmp$y)
   step1_int <- step1_res$full_est[1]
 
@@ -126,7 +130,7 @@ update_func <- function(wls, ld_tot, w_ld, N, M, Nbar, intercept = NULL) {
 
     hsq = M * wls[2] / Nbar
     intercept = max(wls[1])
-    ld <- drop(ld_tot[, 2]) # drop intercept from x
+    ld <- ld_tot[, 2] # drop intercept from x
 
   } else {
 
