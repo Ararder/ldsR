@@ -7,8 +7,6 @@
 
 
 
-}
-
 
 
 
@@ -21,6 +19,12 @@ parse_gwas <- function(path, ldsc_munge = TRUE) {
 
 
 parse_parquet_dir <- function(dir) {
+  # add checks
+  # 1. select numeric columns and SNP
+  # 2. informative error messages if files dont exist
+  # 3. check that m50 and number of columns add up
+
+
   ld <- arrow::read_parquet(paste0(dir, "/ld.parquet"))
   annot <- arrow::read_parquet(paste0(dir, "/annot.parquet"))
 
