@@ -1,5 +1,4 @@
 utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
-req_cols <- c("SNP", "Z", "N")
 
 #' Estimate SNP heritability using LDscore regression
 #'
@@ -22,6 +21,7 @@ req_cols <- c("SNP", "Z", "N")
 #' ldsc_h2(my_gwas)
 #' }
 ldsc_h2 <- function(sumstat, weights=NULL, M=NULL) {
+  req_cols <- c("SNP", "Z", "N")
   stopifnot("sumstat has to be a data.frame or tbl" = "data.frame" %in% class(sumstat))
   stopifnot("SNP, Z and N are required in `sumstat`" = all(req_cols %in% colnames(sumstat)))
 

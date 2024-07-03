@@ -93,6 +93,8 @@ parse_parquet_dir <- function(dir) {
 
 #
 # CONVERT LDSC file structure to parquet
+dirs <- fs::dir_ls("~/Desktop/LDSCORE")
+names <- fs::path_file(dirs)
 ldsc_to_parquet <- function(dir, annot_name) {
   ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
     purrr::map(arrow::read_tsv_arrow, col_select = c("SNP", "L2")) |>
@@ -113,5 +115,4 @@ ldsc_to_parquet <- function(dir, annot_name) {
   list(ld, dplyr::tibble(annot_name = annot_name, m50 = m50, m = m))
 
 }
-
 
