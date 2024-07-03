@@ -33,7 +33,20 @@ check_numeric_columns <- function(ld) {
 }
 
 
+
+ldsc_munge <- function() {
+  
+}
+
 parse_gwas <- function(path, ldsc_munge = TRUE) {
+
+  # check if in ldsc format
+  
+  # check if tidyGWAS format
+
+  # check if tbl
+
+  # should munging be done?
 
 }
 
@@ -101,19 +114,4 @@ ldsc_to_parquet <- function(dir, annot_name) {
 
 }
 
-tidy_results <- function(res) {
-  res
-  dplyr::tibble(
-    annot = names(res$coef_se),
-    coef = res$coef,
-    coef_se = res$coef_se,
-    enrich = res$enrichment,
-    prop = res$M_prop,
-    z = coef/coef_se,
-    tot = res$tot,
-    tot_se = res$tot_se
-  ) |>
-    dplyr::arrange(dplyr::desc(abs(z)))
-
-}
 

@@ -16,10 +16,7 @@ test_that("celltype_ldsc works", {
 test_that("Genetic correlatios works", {
   skip()
   
-  sumstat <- arrow::read_parquet(test_path("fixtures/test_data.parquet"))
   
-  s1 <- dplyr::select(sumstat, SNP, Z = Z.x, N = N.x)
-  s2 <- dplyr::select(sumstat, SNP, Z = Z.y, N = N.y)
   
   expect_no_error(test <- ldsc_rg(s1,s2))
   # profvis::profvis(ldsc_rg(s1, s2))
@@ -31,6 +28,14 @@ test_that("Genetic correlatios works", {
 
 })
 
+test_that("implementation of rg", {
+
+  sumstat <- arrow::read_parquet(test_path("fixtures/test_data.parquet"))
+  
+  s1 <- dplyr::select(sumstat, SNP, Z = Z.x, N = N.x)
+  s2 <- dplyr::select(sumstat, SNP, Z = Z.y, N = N.y)
+
+})
 
 
 
