@@ -11,7 +11,7 @@ ldscore <- function(
   stopifnot(rlang::is_double(x))
   stopifnot("matrix" %in% class(x))
   stopifnot(rlang::is_double(w))
-  stopifnot(rlang::is_double(N))
+  stopifnot(rlang::is_bare_numeric(N))
   stopifnot(rlang::is_double(M))
   stopifnot(rlang::is_integerish(n_blocks))
   stopifnot(all(purrr::map_dbl(list(y,w,N), length) == nrow(x)))

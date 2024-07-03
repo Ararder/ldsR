@@ -1,5 +1,5 @@
 check_is_path <- function(path) {
-  
+
   if(!rlang::is_scalar_character(path)) {
     stop(cli::format_error(
       "The provided argument is not a string: {path}"
@@ -20,7 +20,7 @@ check_numeric_columns <- function(ld) {
   before <- colnames(ld)
   ld <- dplyr::select(ld, "SNP", dplyr::where(is.numeric))
   after <- colnames(ld)
-  
+
   if(!all(before %in% after)) {
     cli::cli_alert_danger(
       "Columns were removed from ld.parquet because they were non-numeric:
@@ -32,45 +32,56 @@ check_numeric_columns <- function(ld) {
   ld
 }
 
+remove_strand_ambig <- function(tbl) {
 
-align_to_ref <- function(dset) {
-  # EffectAllele is harmonized to always be the reference allele
-  dset |>
-    dplyr::mutate(
-      EA_is_ref = dplyr::if_else(EffectAllele == REF, TRUE,FALSE),
-      tmp = EffectAllele,
-      EffectAllele = dplyr::if_else(EA_is_ref, EffectAllele, OtherAllele),
-      OtherAllele = dplyr::if_else(EA_is_ref, OtherAllele, tmp),
-      B = dplyr::if_else(EA_is_ref, B, B*-1),
-      EAF = dplyr::if_else(EA_is_ref, EAF, 1-EAF)
-    ) |>
-    dplyr::select(-dplyr::all_of(c("EA_is_ref", "tmp")))
-
-}
-munge_tidygwas <- function(path, freq=0.9, info=0.9) {
-  arrow::open_dataset(path) |> 
-    align_to_ref() |> 
-    dplyr::filter(!multi-allelic) |> 
-    dplyr::filter(!indel) |> 
-    # remove strand ambigious SNPs
-    # remove MAF
-    # filter INFO
-    # Filter sample sizes outside 2-3x sd
-    # from ldsc:    n_min = args.n_min if args.n_min else dat.N.quantile(0.9) / 1.5
-    # merge-alleles
-
+  dplyr::mutate(tbl, strand_ambig = dplyr::case_when(
+    EffectAllele == 'G' & OtherAllele == 'C' ~ TRUE,
+    EffectAllele == 'C' & OtherAllele == 'G' ~ TRUE,
+    EffectAllele == 'A' & OtherAllele == 'T' ~ TRUE,
+    EffectAllele == 'T' & OtherAllele == 'A' ~ TRUE,
+    .default = FALSE
+  )) |>
+    dplyr::filter(!strand_ambig) |>
+    dplyr::select(-strand_ambig)
 }
 
-ldsc_munge <- function(sumstats) {
-  stopifnot("data.frame" %in% class(sumstats) | rlang::is_scalar_character(sumstats))
-  
-  
+
+
+ldsc_munge <- function(dset, info_filter = 0.9, maf_filter = 0.01, snp_col = "RSID") {
+  ref <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP"))
+
+  step1 <- dset |>
+    dplyr::rename(SNP = {{ snp_col }}) |>
+    dplyr::filter(!is.na(SNP)) |>
+    dplyr::filter(.data[["SNP"]] %in% ref$SNP)
+
+  if("multi_allelic" %in% names(dset$schema)) {
+    step1 <- dplyr::filter(step1, !multi_allelic)
+  }
+
+
+  if("INFO" %in% names(dset$schema)) {
+    step1 <- dplyr::filter(step1, INFO > info_filter)
+  }
+
+  if("EAF" %in% names(dset$schema)) {
+    step1 <- dplyr::filter(step1, EAF > maf_filter & EAF < (1-maf_filter))
+  }
+
+  df <- step1 |>
+    remove_strand_ambig() |>
+    dplyr::select(SNP, Z, N, EffectAllele, OtherAllele) |>
+    dplyr::collect()
+
+  df |>
+    dplyr::filter(N > (quantile(N, 0.9) / 1.5))
 }
+
 
 parse_gwas <- function(tbl, ldsc_munge = TRUE) {
 
   # check if tbl is a filepath or in-memory dataframe or arrow::dataset connection
-  
+
   # should ldsc_munge steps be applied?
 
   # should munging be done?
@@ -86,7 +97,7 @@ parse_parquet_dir <- function(dir) {
   annot_path <- paste0(dir, "/annot.parquet")
   check_is_path(ld_path)
   check_is_path(annot_path)
-  
+
   ld <- arrow::read_parquet(ld_path)
   annot <- arrow::read_parquet(annot_path)
 
