@@ -33,18 +33,45 @@ check_numeric_columns <- function(ld) {
 }
 
 
+align_to_ref <- function(dset) {
+  # EffectAllele is harmonized to always be the reference allele
+  dset |>
+    dplyr::mutate(
+      EA_is_ref = dplyr::if_else(EffectAllele == REF, TRUE,FALSE),
+      tmp = EffectAllele,
+      EffectAllele = dplyr::if_else(EA_is_ref, EffectAllele, OtherAllele),
+      OtherAllele = dplyr::if_else(EA_is_ref, OtherAllele, tmp),
+      B = dplyr::if_else(EA_is_ref, B, B*-1),
+      EAF = dplyr::if_else(EA_is_ref, EAF, 1-EAF)
+    ) |>
+    dplyr::select(-dplyr::all_of(c("EA_is_ref", "tmp")))
 
-ldsc_munge <- function() {
+}
+munge_tidygwas <- function(path, freq=0.9, info=0.9) {
+  arrow::open_dataset(path) |> 
+    align_to_ref() |> 
+    dplyr::filter(!multi-allelic) |> 
+    dplyr::filter(!indel) |> 
+    # remove strand ambigious SNPs
+    # remove MAF
+    # filter INFO
+    # Filter sample sizes outside 2-3x sd
+    # from ldsc:    n_min = args.n_min if args.n_min else dat.N.quantile(0.9) / 1.5
+    # merge-alleles
+
+}
+
+ldsc_munge <- function(sumstats) {
+  stopifnot("data.frame" %in% class(sumstats) | rlang::is_scalar_character(sumstats))
+  
   
 }
 
-parse_gwas <- function(path, ldsc_munge = TRUE) {
+parse_gwas <- function(tbl, ldsc_munge = TRUE) {
 
-  # check if in ldsc format
+  # check if tbl is a filepath or in-memory dataframe or arrow::dataset connection
   
-  # check if tidyGWAS format
-
-  # check if tbl
+  # should ldsc_munge steps be applied?
 
   # should munging be done?
 
