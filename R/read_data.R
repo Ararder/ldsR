@@ -1,93 +1,79 @@
-check_is_path <- function(path) {
-
-  if(!rlang::is_scalar_character(path)) {
-    stop(cli::format_error(
-      "The provided argument is not a string: {path}"
-    ))
-  }
-  # OBS: add more informative path
-  if(!file.exists(path)) {
-    stop(cli::format_error(
-      "The filepath ({.path {path}}) does not exist on the host system"
-    ))
-  }
-
-}
-
-
-
-check_numeric_columns <- function(ld) {
-  before <- colnames(ld)
-  ld <- dplyr::select(ld, "SNP", dplyr::where(is.numeric))
-  after <- colnames(ld)
-
-  if(!all(before %in% after)) {
-    cli::cli_alert_danger(
-      "Columns were removed from ld.parquet because they were non-numeric:
-        {.code {before[!before %in% after]}}
-        "
-    )
-  }
-
-  ld
-}
-
-remove_strand_ambig <- function(tbl) {
-
-  dplyr::mutate(tbl, strand_ambig = dplyr::case_when(
-    EffectAllele == 'G' & OtherAllele == 'C' ~ TRUE,
-    EffectAllele == 'C' & OtherAllele == 'G' ~ TRUE,
-    EffectAllele == 'A' & OtherAllele == 'T' ~ TRUE,
-    EffectAllele == 'T' & OtherAllele == 'A' ~ TRUE,
-    .default = FALSE
-  )) |>
-    dplyr::filter(!strand_ambig) |>
-    dplyr::select(-strand_ambig)
-}
-
-
-
-ldsc_munge <- function(dset, info_filter = 0.9, maf_filter = 0.01, snp_col = "RSID") {
+utils::globalVariables(c("strand_ambig", "INFO", "EAF", "N", "RSID", "EffectAllele", "OtherAllele"))
+#' Parse a GWAS summary statistics
+#'
+#' @param df a in memory [base::data.frame()] or a filepath to ldsc-munged
+#' summary statistics file or a filepath to a tidyGWAS folder.
+#' @param format format of summary statistics. Either a in-memory dataframe, and LDSC munged file, or tidyGWAS filepath
+#'
+#' @return a data.frame
+#' @export
+#'
+#' @examples \dontrun{
+#' parse_gwas(tbl)
+#' }
+parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
+  format <- rlang::arg_match(format)
   ref <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP"))
 
-  step1 <- dset |>
-    dplyr::rename(SNP = {{ snp_col }}) |>
-    dplyr::filter(!is.na(SNP)) |>
-    dplyr::filter(.data[["SNP"]] %in% ref$SNP)
+  if(format == "dataframe") {
+    req_columns <- c("SNP", "Z", "N", "A1", "A2")
+    stopifnot(all(req_columns %in% colnames(df)))
+    final <- tidyr::drop_na(df) |>
+      dplyr::semi_join(ref, by = "SNP")
 
-  if("multi_allelic" %in% names(dset$schema)) {
-    step1 <- dplyr::filter(step1, !multi_allelic)
+
+  } else if(format == "ldsc") {
+    check_is_path(df)
+    final <- tidyr::drop_na(arrow::read_tsv_arrow(df))
+    stopifnot(all(req_columns %in% colnames(final)))
+
+
+  } else if(format == "tidyGWAS") {
+    check_is_path(df)
+    final <- arrow::open_dataset(df) |>
+      dplyr::rename(SNP = RSID, A1 = EffectAllele, A2 = OtherAllele) |>
+      dplyr::select(dplyr::any_of(c("SNP", "A1","A2", "Z","N", "INFO", "EAF"))) |>
+      dplyr::filter(SNP %in% ref$SNP) |>
+      dplyr::collect()
   }
 
+  munge(final)
 
-  if("INFO" %in% names(dset$schema)) {
+}
+
+
+
+
+munge <- function(dset, info_filter = 0.9, maf_filter = 0.01, remove_multi_allelic = TRUE, remove_ambig = TRUE) {
+  stopifnot("data.frame" %in% class(dset))
+  req_columns <- c("SNP", "Z", "N", "EffectAllele", "OtherAllele")
+
+  before <- nrow(dset)
+  step1 <- dplyr::distinct(dset, SNP, .keep_all = TRUE)
+  cli::cli_alert_warning("Removed {before - nrow(step1)} rows with duplicated RSIDs")
+
+
+  if("INFO" %in% colnames(dset)) {
+    before <- nrow(dset)
     step1 <- dplyr::filter(step1, INFO > info_filter)
+    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with INFO below {info_filter")
   }
 
-  if("EAF" %in% names(dset$schema)) {
+  if("EAF" %in% colnames(dset)) {
+    before <- nrow(step1)
     step1 <- dplyr::filter(step1, EAF > maf_filter & EAF < (1-maf_filter))
+    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with INFO below {info_filter")
   }
 
-  df <- step1 |>
-    remove_strand_ambig() |>
-    dplyr::select(SNP, Z, N, EffectAllele, OtherAllele) |>
-    dplyr::collect()
+  before <- nrow(step1)
+  step1 <- remove_strand_ambig(step1)
+  cli::cli_alert_warning("Removed {before - nrow(step1)} rows due to strand ambigious alleles")
 
-  df |>
-    dplyr::filter(N > (quantile(N, 0.9) / 1.5))
+  before <- nrow(step1)
+  N_filter <- round(stats::quantile(step1$N, 0.9) / 1.5)
+  step1 <- dplyr::filter(step1, N > N_filter)
+  cli::cli_alert_warning("Removed {before - nrow(step1)} rows with a sample size smaller than {N_filter}")
 }
-
-
-parse_gwas <- function(tbl, ldsc_munge = TRUE) {
-
-  # check if tbl is a filepath or in-memory dataframe or arrow::dataset connection
-
-  # should ldsc_munge steps be applied?
-
-  # should munging be done?
-
-}
-
 
 
 
@@ -98,7 +84,7 @@ parse_parquet_dir <- function(dir) {
   check_is_path(ld_path)
   check_is_path(annot_path)
 
-  ld <- arrow::read_parquet(ld_path)
+     ld <- arrow::read_parquet(ld_path)
   annot <- arrow::read_parquet(annot_path)
 
   if(ncol(ld) != nrow(annot)+1) {
@@ -150,3 +136,51 @@ ldsc_to_parquet <- function(dir, annot_name) {
 
 }
 
+
+
+check_is_path <- function(path) {
+
+  if(!rlang::is_scalar_character(path)) {
+    stop(cli::format_error(
+      "The provided argument is not a string"
+    ))
+  }
+  # OBS: add more informative path
+  if(!file.exists(path)) {
+    stop(cli::format_error(
+      "The filepath ({.path {path}}) does not exist on the host system"
+    ))
+  }
+
+}
+
+
+
+check_numeric_columns <- function(ld) {
+  before <- colnames(ld)
+  ld <- dplyr::select(ld, "SNP", dplyr::where(is.numeric))
+  after <- colnames(ld)
+
+  if(!all(before %in% after)) {
+    cli::cli_alert_danger(
+      "Columns were removed from ld.parquet because they were non-numeric:
+        {.code {before[!before %in% after]}}
+        "
+    )
+  }
+
+  ld
+}
+
+remove_strand_ambig <- function(tbl) {
+
+  dplyr::mutate(tbl, strand_ambig = dplyr::case_when(
+    A1 == 'G' & A2 == 'C' ~ TRUE,
+    A1 == 'C' & A2 == 'G' ~ TRUE,
+    A1 == 'A' & A2 == 'T' ~ TRUE,
+    A1 == 'T' & A2 == 'A' ~ TRUE,
+    .default = FALSE
+  )) |>
+    dplyr::filter(!strand_ambig) |>
+    dplyr::select(-strand_ambig)
+}
