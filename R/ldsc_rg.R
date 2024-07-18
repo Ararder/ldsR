@@ -19,8 +19,9 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2", "r
 ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   req_cols <- c("SNP", "Z", "N", "A1", "A2")
   check_columns(req_cols, sumstats1)
-  sumstats1 <- dplyr::select(sumstats1, dplyr::all_of(req_cols))
   weights <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2"))
+  sumstats1 <- dplyr::select(sumstats1, dplyr::all_of(req_cols)) |> 
+    dplyr::filter(SNP %in% weights$SNP)
   M <- 1173569
   
   
@@ -39,12 +40,13 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
 
 
 
-.rg <- function(sumstats1, sumstats2, M,weights, n_blocks = 200,trait1 = NULL, trait2=NULL) {
+.rg <- function(sumstats1, sumstats2, M, weights, n_blocks = 200,trait1 = NULL, trait2=NULL) {
   req_cols <- c("SNP", "Z", "N", "A1", "A2")
 
   # check that all columns exist for sumstats2
-  sumstats2 <- dplyr::select(sumstats2, dplyr::all_of(req_cols))
   check_columns(req_cols, sumstats2)
+  sumstats2 <- dplyr::select(sumstats2, dplyr::all_of(req_cols)) |> 
+    dplyr::filter(SNP %in% weights$SNP)
   
   before <- nrow(sumstats1)
   m <- dplyr::inner_join(

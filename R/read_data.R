@@ -13,10 +13,11 @@ utils::globalVariables(c("strand_ambig", "INFO", "EAF", "N", "RSID", "EffectAlle
 #' }
 parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
   format <- rlang::arg_match(format)
+  req_columns <- c("SNP", "Z", "N", "A1", "A2")
   ref <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP"))
 
   if(format == "dataframe") {
-    req_columns <- c("SNP", "Z", "N", "A1", "A2")
+    
     stopifnot(all(req_columns %in% colnames(df)))
     final <- tidyr::drop_na(df) |>
       dplyr::semi_join(ref, by = "SNP")
@@ -43,8 +44,19 @@ parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
 
 
 
-
-munge <- function(dset, info_filter = 0.9, maf_filter = 0.01, remove_multi_allelic = TRUE, remove_ambig = TRUE) {
+#' Munge GWAS summary statistics
+#'
+#' @param dset a [dplyr::tibble()] with columns `SNP`, `A1` `A2` `Z` `N` and possibly `EAF` and `INFO`
+#' @param info_filter INFO score filter threshold at which to remove rows
+#' @param maf_filter  Minor allele frequenc filter at which to remove rows
+#'
+#' @return a data.frame
+#' @export
+#'
+#' @examples \dontrun{
+#' parse_gwas(tbl)
+#' }
+munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   stopifnot("data.frame" %in% class(dset))
   req_columns <- c("SNP", "Z", "N", "EffectAllele", "OtherAllele")
 
@@ -62,7 +74,7 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01, remove_multi_allel
   if("EAF" %in% colnames(dset)) {
     before <- nrow(step1)
     step1 <- dplyr::filter(step1, EAF > maf_filter & EAF < (1-maf_filter))
-    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with INFO below {info_filter")
+    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with MAF below {maf_filter}")
   }
 
   before <- nrow(step1)
