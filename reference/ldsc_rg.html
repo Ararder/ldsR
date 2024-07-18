@@ -46,28 +46,29 @@
 
 
 <dl><dt id="arg-sumstats-">sumstats1<a class="anchor" aria-label="anchor" href="#arg-sumstats-"></a></dt>
-<dd><p>a [dplyr::tibble()] with columns h2 and h2_se</p></dd>
+<dd><p>a <code><a href="https://dplyr.tidyverse.org/reference/reexports.html" class="external-link">dplyr::tibble()</a></code> with atleast the columns SNP, A1, A2, Z, N</p></dd>
 
 
 <dt id="arg-sumstats-">sumstats2<a class="anchor" aria-label="anchor" href="#arg-sumstats-"></a></dt>
-<dd><p>a [dplyr::tibble()] with columns h2 and h2_se</p></dd>
+<dd><p>a <code><a href="https://dplyr.tidyverse.org/reference/reexports.html" class="external-link">dplyr::tibble()</a></code> with atleast the columns SNP, A1, A2, Z, N.
+A list of summary statistics can be passed to estimate rG between sumstats1 and all traits in sumstats2</p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>Optional, a data.frame or tbl with columns SNP and L2</p></dd>
+<dd><p>NOT YET IMPLEMENTED - supply custom weights vector</p></dd>
 
 
 <dt id="arg-m">M<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
-<dd><p>number of snps used to calculate LD in weights</p></dd>
+<dd><p>NOT YET IMPLEMENTED - number of SNPs used to calculate weights</p></dd>
 
 
 <dt id="arg-n-blocks">n_blocks<a class="anchor" aria-label="anchor" href="#arg-n-blocks"></a></dt>
-<dd><p>blocks for jackknife</p></dd>
+<dd><p>Number of blocks to use for jackknife</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a [dplyr::tibble()]</p>
+    <p>a <code><a href="https://dplyr.tidyverse.org/reference/reexports.html" class="external-link">dplyr::tibble()</a></code></p>
     </div>
 
     <div class="section level2">
