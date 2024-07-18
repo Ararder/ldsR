@@ -7,14 +7,14 @@
 ldsc_h2(sumstat, weights = NULL, M = NULL)
 }
 \arguments{
-\item{sumstat}{A data.frame or tbl with columns `SNP`, `Z` and `N`}
+\item{sumstat}{A data.frame or tbl with columns \code{SNP}, \code{Z} and \code{N}}
 
-\item{weights}{Optional, a data.frame or tbl with columns `SNP`, `L2`}
+\item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 
 \item{M}{Optional, the number of SNPs in the reference panel}
 }
 \value{
-a [dplyr::tibble()] with columns `h2` and `h2_se`
+a \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{h2} and \code{h2_se}
 }
 \description{
 An R implementation of the LD score regression method to estimate SNP heritability,

@@ -7,18 +7,19 @@
 ldsc_rg(sumstats1, sumstats2, weights = NULL, M = NULL, n_blocks = 200)
 }
 \arguments{
-\item{sumstats1}{a [dplyr::tibble()] with columns h2 and h2_se}
+\item{sumstats1}{a \code{\link[dplyr:reexports]{dplyr::tibble()}} with atleast the columns SNP, A1, A2, Z, N}
 
-\item{sumstats2}{a [dplyr::tibble()] with columns h2 and h2_se}
+\item{sumstats2}{a \code{\link[dplyr:reexports]{dplyr::tibble()}} with atleast the columns SNP, A1, A2, Z, N.
+A list of summary statistics can be passed to estimate rG between sumstats1 and all traits in sumstats2}
 
-\item{weights}{Optional, a data.frame or tbl with columns SNP and L2}
+\item{weights}{NOT YET IMPLEMENTED - supply custom weights vector}
 
-\item{M}{number of snps used to calculate LD in weights}
+\item{M}{NOT YET IMPLEMENTED - number of SNPs used to calculate weights}
 
-\item{n_blocks}{blocks for jackknife}
+\item{n_blocks}{Number of blocks to use for jackknife}
 }
 \value{
-a [dplyr::tibble()]
+a \code{\link[dplyr:reexports]{dplyr::tibble()}}
 }
 \description{
 Compute the genetic correlation between two traits

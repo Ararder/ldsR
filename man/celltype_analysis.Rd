@@ -7,16 +7,16 @@
 celltype_analysis(sumstat, covariate_dir, celltype_dir, weights = NULL)
 }
 \arguments{
-\item{sumstat}{A data.frame or tbl with columns `SNP`, `Z` and `N`}
+\item{sumstat}{A data.frame or tbl with columns \code{SNP}, \code{Z} and \code{N}}
 
-\item{covariate_dir}{a directory containing the files `ld.parquet` and `annot.parquet`}
+\item{covariate_dir}{a directory containing the files \code{ld.parquet} and \code{annot.parquet}}
 
-\item{celltype_dir}{a directory containing the files `ld.parquet` and `annot.parquet`}
+\item{celltype_dir}{a directory containing the files \code{ld.parquet} and \code{annot.parquet}}
 
 \item{weights}{A numeric vector of regression weights. Comes precomputed within the ldsR package for european LDscores}
 }
 \value{
-a [dplyr::tibble()]
+a \code{\link[dplyr:reexports]{dplyr::tibble()}}
 }
 \description{
 Run partitioned heritability across many annotations

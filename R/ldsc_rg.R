@@ -1,14 +1,14 @@
 
 utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2", "rg", "rg_se",
 "A1.x","A1.y", "A2.x", "A2.y", "Z.y"))
-req_cols <- c("SNP", "Z", "N", "A1", "A2")
 #' Compute the genetic correlation between two traits
 #'
-#' @param sumstats1 a [dplyr::tibble()] with columns h2 and h2_se
-#' @param sumstats2 a [dplyr::tibble()] with columns h2 and h2_se
-#' @param weights Optional, a data.frame or tbl with columns SNP and L2
-#' @param M number of snps used to calculate LD in weights
-#' @param n_blocks blocks for jackknife
+#' @param sumstats1 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N
+#' @param sumstats2 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N.
+#' A list of summary statistics can be passed to estimate rG between sumstats1 and all traits in sumstats2
+#' @param weights NOT YET IMPLEMENTED - supply custom weights vector
+#' @param M NOT YET IMPLEMENTED - number of SNPs used to calculate weights
+#' @param n_blocks Number of blocks to use for jackknife
 #'
 #' @return a [dplyr::tibble()]
 #' @export
@@ -17,24 +17,42 @@ req_cols <- c("SNP", "Z", "N", "A1", "A2")
 #' ldsc_rg(s1, s2)
 #' }
 ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
-  stopifnot("SNP, Z and N are required in `sumstats1`" = all(req_cols %in% colnames(sumstats1)))
-  stopifnot("SNP, Z and N are required in `sumstats2`" = all(req_cols %in% colnames(sumstats2)))
-
+  req_cols <- c("SNP", "Z", "N", "A1", "A2")
+  check_columns(req_cols, sumstats1)
+  sumstats1 <- dplyr::select(sumstats1, dplyr::all_of(req_cols))
   weights <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2"))
   M <- 1173569
-  sumstats1 <- dplyr::select(sumstats1, dplyr::all_of(req_cols))
-  sumstats2 <- dplyr::select(sumstats2, dplyr::all_of(req_cols))
+  
+  
+  
+  # -------------------------------------------------------------------------
+  if("data.frame" %in% class(sumstats2)) sumstats2 <- list(sumstats2)
+  
 
-  m <- 
-    dplyr::inner_join(
+  purrr::map(sumstats2, \(x) .rg(sumstats1, x, M=M, weights=weights, n_blocks = n_blocks),
+    .progress = list(type = "tasks", name = "Computing genetic correlations...")
+  ) |> 
+    purrr::list_rbind()
+
+
+}
+
+
+
+.rg <- function(sumstats1, sumstats2, M,weights, n_blocks = 200,trait1 = NULL, trait2=NULL) {
+  req_cols <- c("SNP", "Z", "N", "A1", "A2")
+
+  # check that all columns exist for sumstats2
+  sumstats2 <- dplyr::select(sumstats2, dplyr::all_of(req_cols))
+  check_columns(req_cols, sumstats2)
+  
+  before <- nrow(sumstats1)
+  m <- dplyr::inner_join(
       weights,
-      # align Z on alleles, flip Z if nessecary
       merge_sumstats(sumstats1, sumstats2),
       by = "SNP"
     )
-
-
-  # -------------------------------------------------------------------------
+  cli::cli_alert_warning("{before - nrow(m)} SNPs were removed when merging summary statistics")
 
   N <- sqrt(m$N.x * m$N.y)
   x <- as.matrix(m$L2)
@@ -50,19 +68,19 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   gencov_int <- res3$int
   gencov_int_se <- res3$int_se
   rg_ratio <- res3$tot / sqrt(res1$tot * res2$tot)
-  
+
   numer <- tot_delete_values(res3, M, mean(N))
   denom <- sqrt(tot_delete_values(res1, M, mean(m$N.x)) * tot_delete_values(res2, M, mean(m$N.y)))
-  
+
   pseudovalues <- vector("numeric", n_blocks)
   for(j in 1:n_blocks) pseudovalues[j] <- n_blocks * rg_ratio - (n_blocks - 1) * numer[j] / denom[j]
   final <- jackknife(matrix(pseudovalues))
-  
+
 
   # report main results ----------------------------------------------------
 
 
-  dplyr::tibble(
+  out <- dplyr::tibble(
     rg = rg_ratio, 
     rg_se = final$se, 
     h2_trait1 = res1$tot, 
@@ -77,12 +95,11 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
     z = rg /rg_se,
     p = stats::pchisq(z, df = 1, lower.tail = FALSE)
   )
+  out$trait1 <- trait1
+  out$trait2 <- trait2
 
-
+  out
 }
-
-
-
 
 merge_sumstats <- function(sumstats1, sumstats2) {
   
@@ -98,3 +115,4 @@ merge_sumstats <- function(sumstats1, sumstats2) {
 
   # 
 }
+

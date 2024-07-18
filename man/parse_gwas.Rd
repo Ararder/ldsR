@@ -7,7 +7,7 @@
 parse_gwas(df, format = c("dataframe", "ldsc", "tidyGWAS"))
 }
 \arguments{
-\item{df}{a in memory [base::data.frame()] or a filepath to ldsc-munged
+\item{df}{a in memory \code{\link[base:data.frame]{base::data.frame()}} or a filepath to ldsc-munged
 summary statistics file or a filepath to a tidyGWAS folder.}
 
 \item{format}{format of summary statistics. Either a in-memory dataframe, and LDSC munged file, or tidyGWAS filepath}
