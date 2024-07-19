@@ -10,10 +10,11 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
 #' are bundled within the ldsR package and are used by default. This corresponds to the `eur_w_ld_chr` folder 
 #' previously shared at the LDSC [github](https://github.com/bulik/ldsc). 
 #' 
-#' You can inspect the LDscores used by default: `df <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))`
+#' You can inspect the LDscores used by default: 
+#' `arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))`
 #'
 #' ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
-#' 1,290,028 HapMap3 SNPs in the reference panel.
+#' 1,290,028 HapMap3 SNPs in the reference panel. See the [munge()] function to mimic the `munge_sumstats.py` function. 
 #'
 #' 
 #'
@@ -26,9 +27,14 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
 #' @return a [dplyr::tibble()] with columns `h2` and `h2_se`
 #' @export
 #'
-#' @examples \dontrun{
-#' ldsc_h2(my_gwas)
-#' }
+#' @examples 
+#' p <- system.file("extdata", "eur_w_ld.parquet", package = "ldsR")
+#' snps <- arrow::read_parquet(p, col_select = c("SNP"))
+#' snps$N <- 130000
+#' snps$Z <- rnorm(nrow(snps))
+#' ldsc_h2(snps)
+#' 
+#' 
 ldsc_h2 <- function(sumstat, weights=NULL, M=NULL, n_blocks = 200) {
   req_cols <- c("SNP", "Z", "N")
   stopifnot("sumstat has to be a data.frame or tbl" = "data.frame" %in% class(sumstat))

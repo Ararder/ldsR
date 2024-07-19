@@ -55,9 +55,28 @@ test_that("munge works", {
 
 
 test_that("ldsc_to_parquet works", {
-  fs::dir_ls("~/projects/move")
+  skip()
+  # fs::dir_ls("~/projects/move")
 
-  ds1 <- arrow::read_parquet("/Users/arvhar/projects/move/clusters/annot.parquet")
-  ds2 <- arrow::open_dataset("/Users/arvhar/projects/move/clusters/ld.parquet")
-  colnames(ds1)
+  # ds1 <- arrow::read_parquet("/Users/arvhar/projects/move/clusters/annot.parquet")
+  # df <- arrow::open_dataset("/Users/arvhar/projects/move/clusters/ld.parquet") |> dplyr::collect()
+  # m50 <- ds1$m50
+  
+  # for(idx in 2:ncol(df)) {
+  #   name <- colnames(df)[idx]
+  #   attr(df[[name]], "m50") <- m50[idx-1]
+  # }
+  
+  # arrow::write_parquet(df, "/Users/arvhar/projects/move/superclusters/clusters.parquet")
+  # l <- arrow::open_dataset("test.parquet")
+
+  # purrr::map_dbl(colnames(l)[-1], \(x) l[["metadata"]][["r"]][["columns"]][[x]][["attributes"]][["m50"]])
+
+
+
+  
+  
+
+
+  
 })

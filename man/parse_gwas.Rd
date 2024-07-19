@@ -4,16 +4,14 @@
 \alias{parse_gwas}
 \title{Parse a GWAS summary statistics}
 \usage{
-parse_gwas(df, format = c("dataframe", "ldsc", "tidyGWAS"))
+parse_gwas(df)
 }
 \arguments{
 \item{df}{a in memory \code{\link[base:data.frame]{base::data.frame()}} or a filepath to ldsc-munged
 summary statistics file or a filepath to a tidyGWAS folder.}
-
-\item{format}{format of summary statistics. Either a in-memory dataframe, and LDSC munged file, or tidyGWAS filepath}
 }
 \value{
-a data.frame
+a \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{SNP}, \code{A1}, \code{A2}, \code{Z}, \code{N}
 }
 \description{
 Parse a GWAS summary statistics

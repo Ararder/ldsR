@@ -19,7 +19,7 @@ test_that("Test inner implementation",{
 
 test_that("ldsc_rg works", {
 
-  res <- ldsc_rg(sumstats1, list(sumstats2, sumstats2))
+  res <- ldsc_rg(sumstats1, list("scz" = sumstats2, "bip" = sumstats2))
 
 })
 

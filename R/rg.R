@@ -3,17 +3,37 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2", "r
 "A1.x","A1.y", "A2.x", "A2.y", "Z.y"))
 #' Compute the genetic correlation between two traits
 #'
-#' @param sumstats1 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N
+#' @param sumstats1 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N.
+#' To perform quality checks, use [munge()] before running `ldsc_rg()`
 #' @param sumstats2 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N.
-#' A list of summary statistics can be passed to estimate rG between sumstats1 and all traits in sumstats2
+#' To estimate rG with between sumstats1 and several traits, wrap the data.frames in a list.
+#' If the names are lost, the column `trait2` will correspond to the index of the list.
+#' Use a named list the retain the names in the `trait2` column
+#' `list(dataframe1, dataframe2, ...)`
 #' @inheritParams ldsc_h2
+#' 
+#' 
 #'
 #' @return a [dplyr::tibble()]
 #' @export
 #'
-#' @examples \dontrun{
-#' ldsc_rg(s1, s2)
-#' }
+#' @examples
+#' path <- system.file("extdata", "eur_w_ld.parquet", package = "ldsR")
+#' snps <- arrow::read_parquet(path, col_select = c("SNP"))
+#' # to make example faster
+#' snps <- dplyr::slice_head(snps, n = 100000)
+#' snps$A1 <- "A"
+#' snps$A2 <- 
+#' snps$N <- 130000
+#' snps$Z <- rnorm(nrow(snps))
+#' snps2 <- snps
+#' snps2$N <- 75000
+#' snps2$Z <- rnorm(nrow(snps))
+#' ldsc_rg(snps, snps2)
+#' # to run estimate the genetic correlations for many traits, wrap s2 in a list
+#' # ldsc_rg(snps, list(snps2, snps2))
+#' # use a named list to create the `trait2` column in the output
+#' # ldsc_rg(snps, list("trait2" = s2, "trait3" = s3, "trait4" = s4))
 ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   req_cols <- c("SNP", "Z", "N", "A1", "A2")
   check_columns(req_cols, sumstats1)
@@ -38,14 +58,14 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   purrr::map(sumstats2, \(x) .rg(sumstats1, sumstats2=x, M=M, weights=weights, n_blocks = n_blocks),
     .progress = list(type = "tasks", name = "Computing genetic correlations...")
   ) |> 
-    purrr::list_rbind()
+    purrr::list_rbind(names_to = "trait2")
 
 
 }
 
 
 
-.rg <- function(sumstats1, sumstats2, M, weights, n_blocks, trait1 = NULL, trait2=NULL) {
+.rg <- function(sumstats1, sumstats2, M, weights, n_blocks) {
   req_cols <- c("SNP", "Z", "N", "A1", "A2")
 
   # check that all columns exist for sumstats2
@@ -105,9 +125,6 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
     z = rg /rg_se,
     p = stats::pchisq(z, df = 1, lower.tail = FALSE)
   )
-  # add optional names
-  out$trait1 <- trait1
-  out$trait2 <- trait2
 
   out
 }

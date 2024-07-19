@@ -26,13 +26,18 @@ LDscores for the European subset of 1000g (2015 release) for 1,290,028 HapMap3 S
 are bundled within the ldsR package and are used by default. This corresponds to the \code{eur_w_ld_chr} folder
 previously shared at the LDSC \href{https://github.com/bulik/ldsc}{github}.
 
-You can inspect the LDscores used by default: \code{df <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))}
+You can inspect the LDscores used by default:
+\code{arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))}
 
 ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
-1,290,028 HapMap3 SNPs in the reference panel.
+1,290,028 HapMap3 SNPs in the reference panel. See the \code{\link[=munge]{munge()}} function to mimic the \code{munge_sumstats.py} function.
 }
 \examples{
-\dontrun{
-ldsc_h2(my_gwas)
-}
+p <- system.file("extdata", "eur_w_ld.parquet", package = "ldsR")
+snps <- arrow::read_parquet(p, col_select = c("SNP"))
+snps$N <- 130000
+snps$Z <- rnorm(nrow(snps))
+ldsc_h2(snps)
+
+
 }

@@ -3,48 +3,45 @@ utils::globalVariables(c("strand_ambig", "INFO", "EAF", "N", "RSID", "EffectAlle
 #'
 #' @param df a in memory [base::data.frame()] or a filepath to ldsc-munged
 #' summary statistics file or a filepath to a tidyGWAS folder.
-#' @param format format of summary statistics. Either a in-memory dataframe, and LDSC munged file, or tidyGWAS filepath
 #'
-#' @return a data.frame
+#' @return a [dplyr::tibble()] with columns `SNP`, `A1`, `A2`, `Z`, `N`
 #' @export
 #'
 #' @examples \dontrun{
 #' parse_gwas(tbl)
 #' }
-parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
-  format <- rlang::arg_match(format)
+parse_gwas <- function(df) {
   req_columns <- c("SNP", "Z", "N", "A1", "A2")
   ref <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP"))
 
-  if(rlang::is_scalar_character(path)) {
-    cli::cli_inform("Assuming GWAS to be a on-disk file...")
-    check_is_path(path)
-    df <- arrow::read_tsv_arrow(path)
+  if(rlang::is_scalar_character(df)) {
+    cli::cli_inform("Assuming GWAS to be a file to be read")
+    check_is_path(df)
+    df <- arrow::read_tsv_arrow(df)
     check_columns(c("SNP", "A1","A2","Z","N"), df)
     
-    tidyr::drop_na(df)
     
   } else if("data.frame" %in% class(df)) {
     cli::cli_inform("In-memory data.frame passed...")
     check_columns(c("SNP", "A1","A2","Z","N"), df)
   
-    final <- dplyr::tibble(df) |> 
+    df <- dplyr::tibble(df) |> 
       tidyr::drop_na() |> 
       dplyr::semi_join(ref, by = "SNP")
   
-    munge(final)
+    
     
   } else if("Dataset" %in% class(df) | "arrow_dplyr_query" %in% class (df)) {
     
-    df |> 
+    df <- df |> 
       dplyr::rename(SNP = RSID, A1 = EffectAllele, A2 = OtherAllele) |>
       dplyr::select(dplyr::any_of(c("SNP", "A1","A2", "Z","N", "INFO", "EAF"))) |>
       dplyr::filter(SNP %in% ref$SNP) |>
-      dplyr::collect() |> 
-      munge()
+      dplyr::collect()
+      
   }
 
-  munge(final)
+  munge(df)
 
 }
 
@@ -67,7 +64,7 @@ parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
 #' }
 munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   stopifnot("data.frame" %in% class(dset))
-  req_columns <- c("SNP", "Z", "N", "EffectAllele", "OtherAllele")
+  req_columns <- c("SNP", "Z", "N", "A1", "A2")
 
   before <- nrow(dset)
   step1 <- dplyr::distinct(dset, SNP, .keep_all = TRUE)
@@ -94,10 +91,18 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   N_filter <- round(stats::quantile(step1$N, 0.9) / 1.5)
   step1 <- dplyr::filter(step1, N > N_filter)
   cli::cli_alert_warning("Removed {before - nrow(step1)} rows with a sample size smaller than {N_filter}")
-  step1
+  
+  dplyr::select(step1, dplyr::all_of(req_columns))
 }
 
+read_celltype_parquet <- function(path) {
+  check_is_path(path)
+  dset <- arrow::open_dataset(path) |> dplyr::collect()
 
+  kk <- purrr::map_dbl(colnames(dset)[-1], \(x) dset[["metadata"]][["r"]][["columns"]][[x]][["attributes"]][["m50"]])
+
+
+}
 
 
 parse_parquet_dir <- function(dir) {
@@ -136,6 +141,18 @@ parse_parquet_dir <- function(dir) {
   )
 }
 
+# merge_ld_annot <- function(ld, annot) {
+
+#   m50 <- annot$m50
+#   m <- annot$m
+  
+#   for(idx in 2:ncol(ld)) {
+#     name <- colnames(ld)[idx]
+#     attr(ld[[name]], "m50") <- m50[idx-1]
+#     attr(ld[[name]], "m") <- m50[idx-1]
+#   }
+
+# }
 
 ldsc_to_parquet <- function(dir, annot_name) {
   ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
@@ -143,10 +160,6 @@ ldsc_to_parquet <- function(dir, annot_name) {
     purrr::list_rbind() |>
     purrr::set_names(c("SNP", annot_name))
 
-  # annot <- fs::dir_ls(dir, glob = "*annot.gz") |>
-  #   purrr::map(arrow::read_tsv_arrow, col_select = c(3,5)) |>
-  #   purrr::list_rbind() |>
-  #   dplyr::rename({{ annot_name }} := 2)
   m50 <- fs::dir_ls(dir, glob = "*M_5_50") |>
     purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
     sum()
@@ -154,7 +167,8 @@ ldsc_to_parquet <- function(dir, annot_name) {
     purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
     sum()
 
-  list(ld, dplyr::tibble(annot_name = annot_name, m50 = m50, m = m))
+  list(ld, m50, m)
+
 
 }
 
