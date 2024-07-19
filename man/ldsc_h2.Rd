@@ -7,7 +7,7 @@
 ldsc_h2(sumstat, weights = NULL, M = NULL, n_blocks = 200)
 }
 \arguments{
-\item{sumstat}{A data.frame or tbl with columns \code{SNP}, \code{Z} and \code{N}}
+\item{sumstat}{A \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{SNP}, \code{Z} and \code{N}}
 
 \item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 

@@ -7,7 +7,7 @@
 celltype_analysis(sumstat, covariate_dir, celltype_dir, weights = NULL)
 }
 \arguments{
-\item{sumstat}{A data.frame or tbl with columns \code{SNP}, \code{Z} and \code{N}}
+\item{sumstat}{A \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{SNP}, \code{Z} and \code{N}}
 
 \item{covariate_dir}{a directory containing the files \code{ld.parquet} and \code{annot.parquet}}
 

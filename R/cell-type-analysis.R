@@ -89,7 +89,7 @@ celltype_analysis <- function(sumstat, covariate_dir, celltype_dir, weights = NU
 }
 
 tidy_results <- function(res) {
-  res
+  res |> 
   dplyr::tibble(
     annot = names(res$coef_se),
     coef = res$coef,

@@ -141,18 +141,7 @@ parse_parquet_dir <- function(dir) {
   )
 }
 
-# merge_ld_annot <- function(ld, annot) {
 
-#   m50 <- annot$m50
-#   m <- annot$m
-  
-#   for(idx in 2:ncol(ld)) {
-#     name <- colnames(ld)[idx]
-#     attr(ld[[name]], "m50") <- m50[idx-1]
-#     attr(ld[[name]], "m") <- m50[idx-1]
-#   }
-
-# }
 
 ldsc_to_parquet <- function(dir, annot_name) {
   ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
@@ -169,9 +158,26 @@ ldsc_to_parquet <- function(dir, annot_name) {
 
   list(ld, m50, m)
 
-
 }
 
+
+ldsc_to_parquet2 <- function(dir) {
+  ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
+    purrr::map(arrow::read_tsv_arrow, col_select = -c("CHR", "BP")) |>
+    purrr::list_rbind()
+
+  annot_names <- colnames(ld)[-1]
+
+  m50 <- fs::dir_ls(dir, glob = "*M_5_50") |>
+    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
+    sum()
+  m <- fs::dir_ls(dir, glob = "*M") |>
+    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
+    sum()
+
+  list(ld, m50, m)
+
+}
 
 remove_strand_ambig <- function(tbl) {
 

@@ -1,6 +1,6 @@
 
 utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2", "rg", "rg_se",
-"A1.x","A1.y", "A2.x", "A2.y", "Z.y"))
+"A1.x","A1.y", "A2.x", "A2.y", "Z.y", "N.x", "N.y"))
 #' Compute the genetic correlation between two traits
 #'
 #' @param sumstats1 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N.
@@ -75,11 +75,16 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   
   before <- nrow(sumstats1)
   # sumstats1 and 2 are merged and Z-score is standardized on alleles in merge_sumstats
-  m <- dplyr::inner_join(weights, merge_sumstats(sumstats1, sumstats2), by = "SNP")
+  m <- dplyr::inner_join(weights, merge_sumstats(sumstats1, sumstats2), by = "SNP") |> 
+    dplyr::mutate(
+      N.x = as.double(N.x),
+      N.y = as.double(N.y),
+    )
   cli::cli_alert_warning("{before - nrow(m)} SNPs were removed when merging summary statistics")
 
 
   # start rg calculation ---------------------------------------------------
+  
   N <- sqrt(m$N.x * m$N.y)
   x <- as.matrix(m$L2)
 
@@ -95,6 +100,7 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   )
 
   # get intercept and rg
+  gencov_int <- res3$int
   gencov_int <- res3$int
   gencov_int_se <- res3$int_se
   rg_ratio <- res3$tot / sqrt(res1$tot * res2$tot)

@@ -50,3 +50,11 @@ test_that("check_columns detects missing columns", {
 
 
 })
+
+test_that("ldsc_rg works", {
+  sumstats1 <- arrow::read_tsv_arrow("~/Desktop/s1.tsv")
+  sumstats2 <- arrow::read_tsv_arrow("~/Desktop/s2.tsv")
+
+  
+
+})
