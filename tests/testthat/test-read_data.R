@@ -33,3 +33,22 @@ test_that("munge works", {
     
 
 })
+
+
+# 
+
+test <- dplyr::tibble(SNP = "rs100", A1 = "T", A2 = "C", B = 0.05)
+path <- "~/Downloads/ldsc.sumstats.gz"
+
+else if("data.frame" %in% class(df)) {
+  check_columns(c("SNP", "A1","A2","Z","N"), df)
+
+  final <- dplyr::tibble(df) |> 
+    tidyr::drop_na() |> 
+    dplyr::semi_join(ref, by = "SNP")
+
+  munge(final)
+  
+}
+
+

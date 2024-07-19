@@ -16,71 +16,39 @@ parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
   req_columns <- c("SNP", "Z", "N", "A1", "A2")
   ref <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP"))
 
-  # parse_gwas handles three different scenarios:
-  # in-memory data.frame
-  # an arrow dataset
-  # a filepath to a ldsc.sumstats.gz file
+  if(rlang::is_scalar_character(path)) {
+    cli::cli_inform("Assuming GWAS to be a on-disk file...")
+    check_is_path(path)
+    df <- arrow::read_tsv_arrow(path)
+    check_columns(c("SNP", "A1","A2","Z","N"), df)
+    
+    tidyr::drop_na(df)
+    
+  } else if("data.frame" %in% class(df)) {
+    cli::cli_inform("In-memory data.frame passed...")
+    check_columns(c("SNP", "A1","A2","Z","N"), df)
   
-  if(!"data.frame" %in% class(df)) {
-    check_is_path(df)
-    
-  } else if("Dataset" %in% class(df)) {
-
-  } else if("ldsc") {
-
-
-  } else if (TRUE) {
-
-
-  }
-
-  if(!"data.frame" %in% class(df)) {
-    df <- dplyr::tibble(df)
-    check_columns(c("SNP", "Z", "N", "A1", "A2"), df)
-    
-    final <- 
-      tidyr::drop_na(df) |>
+    final <- dplyr::tibble(df) |> 
+      tidyr::drop_na() |> 
       dplyr::semi_join(ref, by = "SNP")
-
-
-  } else if(format == "ldsc") {
-    check_is_path(df)
-    final <- tidyr::drop_na(arrow::read_tsv_arrow(df))
-    stopifnot(all(req_columns %in% colnames(final)))
-
-
-  } else if(format == "tidyGWAS") {
-    check_is_path(df)
-    final <- arrow::open_dataset(df) 
+  
+    munge(final)
+    
+  } else if("Dataset" %in% class(df) | "arrow_dplyr_query" %in% class (df)) {
+    
+    df |> 
       dplyr::rename(SNP = RSID, A1 = EffectAllele, A2 = OtherAllele) |>
       dplyr::select(dplyr::any_of(c("SNP", "A1","A2", "Z","N", "INFO", "EAF"))) |>
       dplyr::filter(SNP %in% ref$SNP) |>
-      dplyr::collect()
+      dplyr::collect() |> 
+      munge()
   }
 
   munge(final)
 
 }
 
-# parse_ldsc <- function(path) {
-#   check_is_path(path)
-  
-#   final <- tidyr::drop_na(arrow::read_tsv_arrow(df))
-#   stopifnot(all(req_columns %in% colnames(final)))
-#   final
 
-# }
-
-# parse_in_memory_dataframe <- function(df, ref) {
-#   req_columns <- c("SNP", "Z", "N", "A1", "A2")
-#   stopifnot(all(req_columns %in% colnames(df)))
-
-#   df |> 
-#     dplyr::filter(SNP %in% ref$SNP) |> 
-#     tidyr::drop_na()
-
-
-# }
 
 
 
@@ -109,7 +77,7 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   if("INFO" %in% colnames(dset)) {
     before <- nrow(dset)
     step1 <- dplyr::filter(step1, INFO > info_filter)
-    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with INFO below {info_filter")
+    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with INFO below {info_filter}")
   }
 
   if("EAF" %in% colnames(dset)) {
