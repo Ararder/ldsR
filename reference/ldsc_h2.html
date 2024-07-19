@@ -4,16 +4,18 @@ mimicking ldsc --h2 from the ldsc package.
 LDscores for the European subset of 1000g (2015 release) for 1,290,028 HapMap3 SNPs (with 1,173,569 SNPs with freq &amp;gt; 5%)
 are bundled within the ldsR package and are used by default. This corresponds to the eur_w_ld_chr folder
 previously shared at the LDSC github.
-You can inspect the LDscores used by default: df &amp;lt;- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))
+You can inspect the LDscores used by default:
+arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))
 ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
-1,290,028 HapMap3 SNPs in the reference panel.'><meta property="og:description" content='An R implementation of the LD score regression method to estimate SNP heritability,
+1,290,028 HapMap3 SNPs in the reference panel. See the munge() function to mimic the munge_sumstats.py function.'><meta property="og:description" content='An R implementation of the LD score regression method to estimate SNP heritability,
 mimicking ldsc --h2 from the ldsc package.
 LDscores for the European subset of 1000g (2015 release) for 1,290,028 HapMap3 SNPs (with 1,173,569 SNPs with freq &amp;gt; 5%)
 are bundled within the ldsR package and are used by default. This corresponds to the eur_w_ld_chr folder
 previously shared at the LDSC github.
-You can inspect the LDscores used by default: df &amp;lt;- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))
+You can inspect the LDscores used by default:
+arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))
 ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
-1,290,028 HapMap3 SNPs in the reference panel.'></head><body>
+1,290,028 HapMap3 SNPs in the reference panel. See the munge() function to mimic the munge_sumstats.py function.'></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -52,9 +54,10 @@ mimicking <code>ldsc --h2</code> from the <a href="https://github.com/bulik/ldsc
 <p>LDscores for the European subset of 1000g (2015 release) for 1,290,028 HapMap3 SNPs (with 1,173,569 SNPs with freq &gt; 5%)
 are bundled within the ldsR package and are used by default. This corresponds to the <code>eur_w_ld_chr</code> folder
 previously shared at the LDSC <a href="https://github.com/bulik/ldsc" class="external-link">github</a>.</p>
-<p>You can inspect the LDscores used by default: <code>df &lt;- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))</code></p>
+<p>You can inspect the LDscores used by default:
+<code>arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))</code></p>
 <p>ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
-1,290,028 HapMap3 SNPs in the reference panel.</p>
+1,290,028 HapMap3 SNPs in the reference panel. See the <code><a href="munge.html">munge()</a></code> function to mimic the <code>munge_sumstats.py</code> function.</p>
     </div>
 
     <div class="section level2">
@@ -89,9 +92,17 @@ previously shared at the LDSC <a href="https://github.com/bulik/ldsc" class="ext
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="fu">ldsc_h2</span><span class="op">(</span><span class="va">my_gwas</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"eur_w_ld.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">snps</span> <span class="op">&lt;-</span> <span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="va">p</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SNP"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">snps</span><span class="op">$</span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">130000</span></span></span>
+<span class="r-in"><span><span class="va">snps</span><span class="op">$</span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">snps</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">ldsc_h2</span><span class="op">(</span><span class="va">snps</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          h2   h2_se   int  int_se mean_chi2 lambda_gc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> -<span style="color: #BB0000;">0.000</span><span style="color: #BB0000; text-decoration: underline;">113</span> 0.001<span style="text-decoration: underline;">10</span>  1.00 0.003<span style="text-decoration: underline;">12</span>     0.999     0.996</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

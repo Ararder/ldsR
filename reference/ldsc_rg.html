@@ -28,7 +28,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Compute the genetic correlation between two traits</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Ararder/ldsR/blob/main/R/ldsc_rg.R" class="external-link"><code>R/ldsc_rg.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Ararder/ldsR/blob/main/R/rg.R" class="external-link"><code>R/rg.R</code></a></small>
       <div class="d-none name"><code>ldsc_rg.Rd</code></div>
     </div>
 
@@ -46,12 +46,16 @@
 
 
 <dl><dt id="arg-sumstats-">sumstats1<a class="anchor" aria-label="anchor" href="#arg-sumstats-"></a></dt>
-<dd><p>a <code><a href="https://dplyr.tidyverse.org/reference/reexports.html" class="external-link">dplyr::tibble()</a></code> with atleast the columns SNP, A1, A2, Z, N</p></dd>
+<dd><p>a <code><a href="https://dplyr.tidyverse.org/reference/reexports.html" class="external-link">dplyr::tibble()</a></code> with atleast the columns SNP, A1, A2, Z, N.
+To perform quality checks, use <code><a href="munge.html">munge()</a></code> before running <code>ldsc_rg()</code></p></dd>
 
 
 <dt id="arg-sumstats-">sumstats2<a class="anchor" aria-label="anchor" href="#arg-sumstats-"></a></dt>
 <dd><p>a <code><a href="https://dplyr.tidyverse.org/reference/reexports.html" class="external-link">dplyr::tibble()</a></code> with atleast the columns SNP, A1, A2, Z, N.
-A list of summary statistics can be passed to estimate rG between sumstats1 and all traits in sumstats2</p></dd>
+To estimate rG with between sumstats1 and several traits, wrap the data.frames in a list.
+If the names are lost, the column <code>trait2</code> will correspond to the index of the list.
+Use a named list the retain the names in the <code>trait2</code> column
+<code>list(dataframe1, dataframe2, ...)</code></p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
@@ -73,9 +77,31 @@ A list of summary statistics can be passed to estimate rG between sumstats1 and 
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="fu">ldsc_rg</span><span class="op">(</span><span class="va">s1</span>, <span class="va">s2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"eur_w_ld.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">snps</span> <span class="op">&lt;-</span> <span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SNP"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># to make example faster</span></span></span>
+<span class="r-in"><span><span class="va">snps</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span><span class="va">snps</span>, n <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">snps</span><span class="op">$</span><span class="va">A1</span> <span class="op">&lt;-</span> <span class="st">"A"</span></span></span>
+<span class="r-in"><span><span class="va">snps</span><span class="op">$</span><span class="va">A2</span> <span class="op">&lt;-</span> </span></span>
+<span class="r-in"><span><span class="va">snps</span><span class="op">$</span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">130000</span></span></span>
+<span class="r-in"><span><span class="va">snps</span><span class="op">$</span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">snps</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">snps2</span> <span class="op">&lt;-</span> <span class="va">snps</span></span></span>
+<span class="r-in"><span><span class="va">snps2</span><span class="op">$</span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">75000</span></span></span>
+<span class="r-in"><span><span class="va">snps2</span><span class="op">$</span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">snps</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">ldsc_rg</span><span class="op">(</span><span class="va">snps</span>, <span class="va">snps2</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NaNs produced</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NaNs produced</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 14</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   trait2    rg rg_se h2_trait1 h2_trait_se h2_trait2 h2_trait2_se     gcov</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      1   <span style="color: #BB0000;">NaN</span>    <span style="color: #BB0000;">NA</span>  0.000<span style="text-decoration: underline;">682</span>     0.003<span style="text-decoration: underline;">92</span>  -<span style="color: #BB0000;">0.005</span><span style="color: #BB0000; text-decoration: underline;">72</span>      0.006<span style="text-decoration: underline;">33</span> 0.000<span style="text-decoration: underline;">787</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6 more variables: gcov_se &lt;dbl&gt;, gcov_int &lt;dbl&gt;, gcov_int_se &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   mean_z1z2 &lt;dbl&gt;, z &lt;dbl&gt;, p &lt;dbl&gt;</span></span>
+<span class="r-in"><span><span class="co"># to run estimate the genetic correlations for many traits, wrap s2 in a list</span></span></span>
+<span class="r-in"><span><span class="co"># ldsc_rg(snps, list(snps2, snps2))</span></span></span>
+<span class="r-in"><span><span class="co"># use a named list to create the `trait2` column in the output</span></span></span>
+<span class="r-in"><span><span class="co"># ldsc_rg(snps, list("trait2" = s2, "trait3" = s3, "trait4" = s4))</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
