@@ -35,20 +35,29 @@ test_that("munge works", {
 })
 
 
-# 
+# # 
 
-test <- dplyr::tibble(SNP = "rs100", A1 = "T", A2 = "C", B = 0.05)
-path <- "~/Downloads/ldsc.sumstats.gz"
+# test <- dplyr::tibble(SNP = "rs100", A1 = "T", A2 = "C", B = 0.05)
+# path <- "~/Downloads/ldsc.sumstats.gz"
 
-else if("data.frame" %in% class(df)) {
-  check_columns(c("SNP", "A1","A2","Z","N"), df)
+# else if("data.frame" %in% class(df)) {
+#   check_columns(c("SNP", "A1","A2","Z","N"), df)
 
-  final <- dplyr::tibble(df) |> 
-    tidyr::drop_na() |> 
-    dplyr::semi_join(ref, by = "SNP")
+#   final <- dplyr::tibble(df) |> 
+#     tidyr::drop_na() |> 
+#     dplyr::semi_join(ref, by = "SNP")
 
-  munge(final)
+#   munge(final)
   
-}
+# }
 
 
+
+
+test_that("ldsc_to_parquet works", {
+  fs::dir_ls("~/projects/move")
+
+  ds1 <- arrow::read_parquet("/Users/arvhar/projects/move/clusters/annot.parquet")
+  ds2 <- arrow::open_dataset("/Users/arvhar/projects/move/clusters/ld.parquet")
+  colnames(ds1)
+})

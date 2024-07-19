@@ -94,6 +94,7 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   N_filter <- round(stats::quantile(step1$N, 0.9) / 1.5)
   step1 <- dplyr::filter(step1, N > N_filter)
   cli::cli_alert_warning("Removed {before - nrow(step1)} rows with a sample size smaller than {N_filter}")
+  step1
 }
 
 
