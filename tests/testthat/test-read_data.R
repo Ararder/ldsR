@@ -56,7 +56,15 @@ test_that("munge works", {
 
 test_that("ldsc_to_parquet works", {
   skip()
-  # fs::dir_ls("~/projects/move")
+  snps <- arrow::read_parquet("tests/testthat/fixtures/baseline_v1.1/ld.parquet") |> 
+    dplyr::slice_head(n = 100000)
+  write_parquet("")
+
+
+  ld <- arrow::read_parquet(fs::path(outdir, "ld.parquet"))
+  arrow::read_parquet(fs::path("annot_ref.parquet"))
+  annot <- arrow::read_parquet(fs::path(outdir, "annot.parquet"))
+  
 
   # ds1 <- arrow::read_parquet("/Users/arvhar/projects/move/clusters/annot.parquet")
   # df <- arrow::open_dataset("/Users/arvhar/projects/move/clusters/ld.parquet") |> dplyr::collect()

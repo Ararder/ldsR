@@ -2,7 +2,7 @@
 % Please edit documentation in R/h2.R
 \name{ldsc_h2}
 \alias{ldsc_h2}
-\title{Estimate SNP heritability using LDscore regression}
+\title{Estimate SNP heritability using LDscore regression for a single annotation}
 \usage{
 ldsc_h2(sumstat, weights = NULL, M = NULL, n_blocks = 200)
 }

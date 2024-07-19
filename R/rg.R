@@ -1,6 +1,13 @@
 
-utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2", "rg", "rg_se",
+utils::globalVariables(c("SNP", "coef", "coef_se", "z", "L2", "rg", "rg_se",
 "A1.x","A1.y", "A2.x", "A2.y", "Z.y", "N.x", "N.y"))
+
+
+
+
+
+
+
 #' Compute the genetic correlation between two traits
 #'
 #' @param sumstats1 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N.
@@ -134,6 +141,8 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
 
   out
 }
+
+
 
 merge_sumstats <- function(sumstats1, sumstats2) {
   

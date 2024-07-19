@@ -161,21 +161,39 @@ ldsc_to_parquet <- function(dir, annot_name) {
 }
 
 
-ldsc_to_parquet2 <- function(dir) {
+ldsc_to_parquet2 <- function(dir, outdir) {
   ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
     purrr::map(arrow::read_tsv_arrow, col_select = -c("CHR", "BP")) |>
     purrr::list_rbind()
 
   annot_names <- colnames(ld)[-1]
 
-  m50 <- fs::dir_ls(dir, glob = "*M_5_50") |>
-    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
-    sum()
+  m50 <- 
+    fs::dir_ls(dir, glob = "*M_5_50") |>
+    purrr::map(\(x) arrow::read_tsv_arrow(x, col_names = FALSE)) |> 
+    purrr::list_rbind() |> 
+    dplyr::summarise(dplyr::across(dplyr::everything(), sum)) |> 
+    purrr::set_names(annot_names) |> 
+    tidyr::pivot_longer(dplyr::everything(), names_to = "annot", values_to = "m50")
+    
   m <- fs::dir_ls(dir, glob = "*M") |>
-    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
-    sum()
+    purrr::map(\(x) arrow::read_tsv_arrow(x, col_names = FALSE)) |> 
+    purrr::list_rbind() |> 
+    dplyr::summarise(dplyr::across(dplyr::everything(), sum)) |> 
+    purrr::set_names(annot_names) |> 
+    tidyr::pivot_longer(dplyr::everything(), names_to = "annot", values_to = "m")
 
-  list(ld, m50, m)
+  annot_ref <- 
+    fs::dir_ls(dir, glob = "*annot.gz") |> 
+    purrr::map(arrow::read_tsv_arrow, col_select = -c("CHR", "BP")) |>
+    purrr::list_rbind()
+  
+  annot <- dplyr::inner_join(m50, m, by = "annot")
+
+  arrow::write_parquet(ld, fs::path(outdir, "ld.parquet"))
+  arrow::write_parquet(annot_ref, fs::path(outdir, "annot_ref.parquet"))
+  arrow::write_parquet(annot, fs::path(outdir, "annot.parquet"))
+  
 
 }
 
