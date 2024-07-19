@@ -6,9 +6,7 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2", "r
 #' @param sumstats1 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N
 #' @param sumstats2 a [dplyr::tibble()] with atleast the columns SNP, A1, A2, Z, N.
 #' A list of summary statistics can be passed to estimate rG between sumstats1 and all traits in sumstats2
-#' @param weights NOT YET IMPLEMENTED - supply custom weights vector
-#' @param M NOT YET IMPLEMENTED - number of SNPs used to calculate weights
-#' @param n_blocks Number of blocks to use for jackknife
+#' @inheritParams ldsc_h2
 #'
 #' @return a [dplyr::tibble()]
 #' @export
@@ -19,10 +17,17 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2", "r
 ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   req_cols <- c("SNP", "Z", "N", "A1", "A2")
   check_columns(req_cols, sumstats1)
-  weights <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2"))
-  sumstats1 <- dplyr::select(sumstats1, dplyr::all_of(req_cols)) |> 
-    dplyr::filter(SNP %in% weights$SNP)
-  M <- 1173569
+  
+  if(is.null(weights)) {
+    weights <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2"))
+    M <- 1173569
+  } else {
+    stopifnot("`weights` must be a data.frane with columns `SNP` and `L2`" = "data.frame" %in% class(weights))
+    check_columns(c("SNP", "L2"), weights)
+    stopifnot("To use custom weights, you must also pass `M`" = !is.null(M))
+  }
+  
+  sumstats1 <- dplyr::select(sumstats1, dplyr::all_of(req_cols))
   
   
   
@@ -30,7 +35,7 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
   if("data.frame" %in% class(sumstats2)) sumstats2 <- list(sumstats2)
   
 
-  purrr::map(sumstats2, \(x) .rg(sumstats1, x, M=M, weights=weights, n_blocks = n_blocks),
+  purrr::map(sumstats2, \(x) .rg(sumstats1, sumstats2=x, M=M, weights=weights, n_blocks = n_blocks),
     .progress = list(type = "tasks", name = "Computing genetic correlations...")
   ) |> 
     purrr::list_rbind()
@@ -40,7 +45,7 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
 
 
 
-.rg <- function(sumstats1, sumstats2, M, weights, n_blocks = 200,trait1 = NULL, trait2=NULL) {
+.rg <- function(sumstats1, sumstats2, M, weights, n_blocks, trait1 = NULL, trait2=NULL) {
   req_cols <- c("SNP", "Z", "N", "A1", "A2")
 
   # check that all columns exist for sumstats2
@@ -49,31 +54,34 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
     dplyr::filter(SNP %in% weights$SNP)
   
   before <- nrow(sumstats1)
-  m <- dplyr::inner_join(
-      weights,
-      merge_sumstats(sumstats1, sumstats2),
-      by = "SNP"
-    )
+  # sumstats1 and 2 are merged and Z-score is standardized on alleles in merge_sumstats
+  m <- dplyr::inner_join(weights, merge_sumstats(sumstats1, sumstats2), by = "SNP")
   cli::cli_alert_warning("{before - nrow(m)} SNPs were removed when merging summary statistics")
 
+
+  # start rg calculation ---------------------------------------------------
   N <- sqrt(m$N.x * m$N.y)
   x <- as.matrix(m$L2)
+
+  # first get ldscore regression results for each trait
   res1 <- ldscore(y = m$Z.x^2, x = x, w = m$L2, N = m$N.x, M = M)
   res2 <- ldscore(y = m$Z.y^2, x = x, w = m$L2, N = m$N.y, M = M)
+  
+  # then for product of z-scores
   res3 <- gencov(
     z1 = m$Z.x,z2 = m$Z.y,w = m$L2, x = x, N1 = m$N.x, N2 = m$N.y, M = M,
     hsq1_tot = res1$tot, hsq2_tot = res2$tot, intercept_hsq1 = res1$int,
     intercept_hsq2 = res2$int
   )
 
-
+  # get intercept and rg
   gencov_int <- res3$int
   gencov_int_se <- res3$int_se
   rg_ratio <- res3$tot / sqrt(res1$tot * res2$tot)
 
+  # get standard error by computing ratio jackknifes
   numer <- tot_delete_values(res3, M, mean(N))
   denom <- sqrt(tot_delete_values(res1, M, mean(m$N.x)) * tot_delete_values(res2, M, mean(m$N.y)))
-
   pseudovalues <- vector("numeric", n_blocks)
   for(j in 1:n_blocks) pseudovalues[j] <- n_blocks * rg_ratio - (n_blocks - 1) * numer[j] / denom[j]
   final <- jackknife(matrix(pseudovalues))
@@ -97,6 +105,7 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
     z = rg /rg_se,
     p = stats::pchisq(z, df = 1, lower.tail = FALSE)
   )
+  # add optional names
   out$trait1 <- trait1
   out$trait2 <- trait2
 

@@ -2,10 +2,9 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
 req_cols <- c("SNP", "Z", "N")
 #' Run partitioned heritability across many annotations
 #'
-#' @param sumstat A data.frame or tbl with columns `SNP`, `Z` and `N`
+#' @inheritParams ldsc_h2
 #' @param covariate_dir a directory containing the files `ld.parquet` and `annot.parquet`
 #' @param celltype_dir a directory containing the files `ld.parquet` and `annot.parquet`
-#' @param weights A numeric vector of regression weights. Comes precomputed within the ldsR package for european LDscores
 #'
 #' @return a [dplyr::tibble()]
 #' @export

@@ -13,7 +13,7 @@ celltype_analysis(sumstat, covariate_dir, celltype_dir, weights = NULL)
 
 \item{celltype_dir}{a directory containing the files \code{ld.parquet} and \code{annot.parquet}}
 
-\item{weights}{A numeric vector of regression weights. Comes precomputed within the ldsR package for european LDscores}
+\item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 }
 \value{
 a \code{\link[dplyr:reexports]{dplyr::tibble()}}

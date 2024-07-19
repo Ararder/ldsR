@@ -4,15 +4,24 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
 #'
 #' @description
 #' An R implementation of the LD score regression method to estimate SNP heritability,
-#' which should produce identical results to ldsc.py --h2 command.
-#' The package uses by default the eur_w_ld scores from the LDSC tutorial.
+#' mimicking `ldsc --h2` from the [ldsc](https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation) package. 
+#' 
+#' LDscores for the European subset of 1000g (2015 release) for 1,290,028 HapMap3 SNPs (with 1,173,569 SNPs with freq > 5%)
+#' are bundled within the ldsR package and are used by default. This corresponds to the `eur_w_ld_chr` folder 
+#' previously shared at the LDSC [github](https://github.com/bulik/ldsc). 
+#' 
+#' You can inspect the LDscores used by default: `df <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))`
 #'
-#' The function does not apply any quality control checks, and assumes everything is in order.
+#' ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
+#' 1,290,028 HapMap3 SNPs in the reference panel.
+#'
+#' 
 #'
 #'
 #' @param sumstat A data.frame or tbl with columns `SNP`, `Z` and `N`
 #' @param weights Optional, a data.frame or tbl with columns `SNP`, `L2`
 #' @param M Optional, the number of SNPs in the reference panel
+#' @param n_blocks Number of blocks to use for the jackknife estimator
 #'
 #' @return a [dplyr::tibble()] with columns `h2` and `h2_se`
 #' @export
@@ -20,25 +29,28 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
 #' @examples \dontrun{
 #' ldsc_h2(my_gwas)
 #' }
-ldsc_h2 <- function(sumstat, weights=NULL, M=NULL) {
+ldsc_h2 <- function(sumstat, weights=NULL, M=NULL, n_blocks = 200) {
   req_cols <- c("SNP", "Z", "N")
   stopifnot("sumstat has to be a data.frame or tbl" = "data.frame" %in% class(sumstat))
-  stopifnot("SNP, Z and N are required in `sumstat`" = all(req_cols %in% colnames(sumstat)))
+  check_columns(req_cols, sumstat)
 
   if(is.null(weights)) {
     weights <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2"))
     M <- 1173569
   } else {
-    weights <- weights
-    stopifnot(!is.null(M))
+    stopifnot("`weights` must be a data.frane with columns `SNP` and `L2`" = "data.frame" %in% class(weights))
+    check_columns(c("SNP", "L2"), weights)
+    stopifnot("To use custom weights, you must also pass `M`" = !is.null(M))
   }
-  sumstat <- dplyr::select(sumstat, dplyr::all_of(req_cols))
-  m <- dplyr::inner_join(weights, sumstat, by = "SNP")
 
 
-  results <- ldscore(y = m$Z^2, x = as.matrix(m$L2), w = m$L2, N = m$N, M = M)
+  # merge and run ldscore regression ---------------------------------------
 
+  m <- dplyr::inner_join(weights, dplyr::select(sumstat, dplyr::all_of(req_cols)), by = "SNP")
+
+  results <- ldscore(y = m$Z^2, x = as.matrix(m$L2), w = m$L2, N = m$N, M = M, n_blocks=n_blocks)
   mean_chi2 <- mean(m$Z^2)
+
   if(mean_chi2 > 1) {
     ratio_se = results$int_se / (mean_chi2 - 1)
     ratio = (results$int - 1) / (mean_chi2 - 1)

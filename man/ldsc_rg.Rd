@@ -12,11 +12,11 @@ ldsc_rg(sumstats1, sumstats2, weights = NULL, M = NULL, n_blocks = 200)
 \item{sumstats2}{a \code{\link[dplyr:reexports]{dplyr::tibble()}} with atleast the columns SNP, A1, A2, Z, N.
 A list of summary statistics can be passed to estimate rG between sumstats1 and all traits in sumstats2}
 
-\item{weights}{NOT YET IMPLEMENTED - supply custom weights vector}
+\item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 
-\item{M}{NOT YET IMPLEMENTED - number of SNPs used to calculate weights}
+\item{M}{Optional, the number of SNPs in the reference panel}
 
-\item{n_blocks}{Number of blocks to use for jackknife}
+\item{n_blocks}{Number of blocks to use for the jackknife estimator}
 }
 \value{
 a \code{\link[dplyr:reexports]{dplyr::tibble()}}

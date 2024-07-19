@@ -38,7 +38,6 @@ lstq_jackknife <- function(x, y, n_blocks = 200,separators = NULL) {
   # return both pseudo and delete values
   res$pseudo <- pseudo
   res$delete_values <- delete_values
-  res$est
   res$full_est <- est
   res$separators <- separators
   res

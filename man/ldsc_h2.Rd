@@ -4,7 +4,7 @@
 \alias{ldsc_h2}
 \title{Estimate SNP heritability using LDscore regression}
 \usage{
-ldsc_h2(sumstat, weights = NULL, M = NULL)
+ldsc_h2(sumstat, weights = NULL, M = NULL, n_blocks = 200)
 }
 \arguments{
 \item{sumstat}{A data.frame or tbl with columns \code{SNP}, \code{Z} and \code{N}}
@@ -12,16 +12,24 @@ ldsc_h2(sumstat, weights = NULL, M = NULL)
 \item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 
 \item{M}{Optional, the number of SNPs in the reference panel}
+
+\item{n_blocks}{Number of blocks to use for the jackknife estimator}
 }
 \value{
 a \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{h2} and \code{h2_se}
 }
 \description{
 An R implementation of the LD score regression method to estimate SNP heritability,
-which should produce identical results to ldsc.py --h2 command.
-The package uses by default the eur_w_ld scores from the LDSC tutorial.
+mimicking \code{ldsc --h2} from the \href{https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation}{ldsc} package.
 
-The function does not apply any quality control checks, and assumes everything is in order.
+LDscores for the European subset of 1000g (2015 release) for 1,290,028 HapMap3 SNPs (with 1,173,569 SNPs with freq > 5\%)
+are bundled within the ldsR package and are used by default. This corresponds to the \code{eur_w_ld_chr} folder
+previously shared at the LDSC \href{https://github.com/bulik/ldsc}{github}.
+
+You can inspect the LDscores used by default: \code{df <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))}
+
+ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
+1,290,028 HapMap3 SNPs in the reference panel.
 }
 \examples{
 \dontrun{

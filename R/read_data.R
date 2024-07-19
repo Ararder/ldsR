@@ -16,10 +16,30 @@ parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
   req_columns <- c("SNP", "Z", "N", "A1", "A2")
   ref <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP"))
 
-  if(format == "dataframe") {
+  # parse_gwas handles three different scenarios:
+  # in-memory data.frame
+  # an arrow dataset
+  # a filepath to a ldsc.sumstats.gz file
+  
+  if(!"data.frame" %in% class(df)) {
+    check_is_path(df)
     
-    stopifnot(all(req_columns %in% colnames(df)))
-    final <- tidyr::drop_na(df) |>
+  } else if("Dataset" %in% class(df)) {
+
+  } else if("ldsc") {
+
+
+  } else if (TRUE) {
+
+
+  }
+
+  if(!"data.frame" %in% class(df)) {
+    df <- dplyr::tibble(df)
+    check_columns(c("SNP", "Z", "N", "A1", "A2"), df)
+    
+    final <- 
+      tidyr::drop_na(df) |>
       dplyr::semi_join(ref, by = "SNP")
 
 
@@ -31,7 +51,7 @@ parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
 
   } else if(format == "tidyGWAS") {
     check_is_path(df)
-    final <- arrow::open_dataset(df) |>
+    final <- arrow::open_dataset(df) 
       dplyr::rename(SNP = RSID, A1 = EffectAllele, A2 = OtherAllele) |>
       dplyr::select(dplyr::any_of(c("SNP", "A1","A2", "Z","N", "INFO", "EAF"))) |>
       dplyr::filter(SNP %in% ref$SNP) |>
@@ -41,6 +61,27 @@ parse_gwas <- function(df, format = c("dataframe", "ldsc", "tidyGWAS")) {
   munge(final)
 
 }
+
+# parse_ldsc <- function(path) {
+#   check_is_path(path)
+  
+#   final <- tidyr::drop_na(arrow::read_tsv_arrow(df))
+#   stopifnot(all(req_columns %in% colnames(final)))
+#   final
+
+# }
+
+# parse_in_memory_dataframe <- function(df, ref) {
+#   req_columns <- c("SNP", "Z", "N", "A1", "A2")
+#   stopifnot(all(req_columns %in% colnames(df)))
+
+#   df |> 
+#     dplyr::filter(SNP %in% ref$SNP) |> 
+#     tidyr::drop_na()
+
+
+# }
+
 
 
 
@@ -96,7 +137,7 @@ parse_parquet_dir <- function(dir) {
   check_is_path(ld_path)
   check_is_path(annot_path)
 
-     ld <- arrow::read_parquet(ld_path)
+  ld <- arrow::read_parquet(ld_path)
   annot <- arrow::read_parquet(annot_path)
 
   if(ncol(ld) != nrow(annot)+1) {
@@ -148,41 +189,6 @@ ldsc_to_parquet <- function(dir, annot_name) {
 
 }
 
-
-
-check_is_path <- function(path) {
-
-  if(!rlang::is_scalar_character(path)) {
-    stop(cli::format_error(
-      "The provided argument is not a string"
-    ))
-  }
-  # OBS: add more informative path
-  if(!file.exists(path)) {
-    stop(cli::format_error(
-      "The filepath ({.path {path}}) does not exist on the host system"
-    ))
-  }
-
-}
-
-
-
-check_numeric_columns <- function(ld) {
-  before <- colnames(ld)
-  ld <- dplyr::select(ld, "SNP", dplyr::where(is.numeric))
-  after <- colnames(ld)
-
-  if(!all(before %in% after)) {
-    cli::cli_alert_danger(
-      "Columns were removed from ld.parquet because they were non-numeric:
-        {.code {before[!before %in% after]}}
-        "
-    )
-  }
-
-  ld
-}
 
 remove_strand_ambig <- function(tbl) {
 

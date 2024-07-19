@@ -113,7 +113,7 @@ rg_weights <- function(ld, w_ld, N1, N2, M, h1, h2, rho_g, intercept_gencov=0, i
 
 }
 
-# filtering on N1 and N2 is done before
+
 rg_update_func <-  function(
     wls, ld, w_ld, N1, N2, M, Nbar, intercept=NULL,
     hsq1, hsq2, intercept_hsq1, intercept_hsq2

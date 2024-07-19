@@ -11,9 +11,9 @@ sumstats2 <- dplyr::select(tmp, SNP, Z = Z.y, N = N.y, A1, A2)
 test_that("Test inner implementation",{
 
   
-  expect_no_error(.rg(sumstats1, sumstats2, M = 1173569, weights=weights))
+  expect_no_error(.rg(sumstats1, sumstats2, M = 1173569, weights=weights, n_blocks=200))
 
-  expect_no_error(.rg(sumstats1, sumstats2, M = 1173569, weights=weights))
+  expect_no_error(.rg(sumstats1, sumstats2, M = 1173569, weights=weights, n_blocks=200))
 
 })
 

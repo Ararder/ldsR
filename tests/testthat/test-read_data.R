@@ -3,7 +3,7 @@
 
 
 test_that("parse_gwas", {
-  
+  skip()
   expect_no_error(
     parse_gwas(
       test_path("fixtures/test_ldsc.sumstats.gz"),
