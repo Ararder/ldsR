@@ -98,12 +98,9 @@ annotations, the functionality to adjust the enrichment estimate has not
 yet been implemented. Therefore the enrichment estimate should not be
 used.
 
-```{r}
-dir_tree(test_path("testdata/baseline"))
 
-```
 
-```{r}
+```{r, eval = FALSE}
 partitioned_h2(
   sumstat1,
   ldscore_dir = test_path("testdata/baseline")
@@ -121,7 +118,7 @@ cell-types to test. We pass the annotations that should be in each model to
 `covariate_dir`, and the ldscores for the cell-type to ldscore_dir
 
 
-```{r}
+```{r, eval=FALSE}
 celltype_analysis(
   sumstat1,
   covariate_dir = test_path("testdata/baseline"),
