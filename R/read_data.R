@@ -65,7 +65,8 @@ parse_gwas <- function(df) {
 munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   stopifnot("data.frame" %in% class(dset))
   req_columns <- c("SNP", "Z", "N", "A1", "A2")
-
+  check_columns(req_columns, dset)
+  
   before <- nrow(dset)
   step1 <- dplyr::distinct(dset, SNP, .keep_all = TRUE)
   cli::cli_alert_warning("Removed {before - nrow(step1)} rows with duplicated RSIDs")
