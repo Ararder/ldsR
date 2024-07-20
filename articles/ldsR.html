@@ -136,10 +136,10 @@ saved in the <code>trait2</code> column.</p>
 <span>          </span>
 <span><span class="fu"><a href="../reference/ldsc_rg.html">ldsc_rg</a></span><span class="op">(</span><span class="va">sumstat1</span>, <span class="va">sumstats</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  </span></span>
+<span><span class="co">#&gt; ⠙ 2/3 ETA:  2s | Computing genetic correlations...</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
+<span><span class="co">#&gt; ⠙ 2/3 ETA: 2s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 14</span></span></span>
 <span><span class="co">#&gt;   trait2    rg  rg_se h2_trait1 h2_trait_se h2_trait2 h2_trait2_se  gcov gcov_se</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -148,6 +148,31 @@ saved in the <code>trait2</code> column.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> trait4 0.734 0.049<span style="text-decoration: underline;">6</span>     0.371      0.035<span style="text-decoration: underline;">8</span>    0.073<span style="text-decoration: underline;">2</span>      0.006<span style="text-decoration: underline;">85</span> 0.121  0.011<span style="text-decoration: underline;">3</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: gcov_int &lt;dbl&gt;, gcov_int_se &lt;dbl&gt;, mean_z1z2 &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   z &lt;dbl&gt;, p &lt;dbl&gt;</span></span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="munge">Munge<a class="anchor" aria-label="anchor" href="#munge"></a>
+</h2>
+<p>The <code><a href="../reference/munge.html">munge()</a></code> function can be used to mimic some of the
+filters of the munge_sumstats.py file from ldsc.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/munge.html">munge</a></span><span class="op">(</span><span class="va">sumstat1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Removed 0 rows with duplicated RSIDs</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Removed 0 rows due to strand ambigious alleles</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Removed 0 rows with a sample size smaller than 87096</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 100,000 × 5</span></span></span>
+<span><span class="co">#&gt;    SNP             Z      N A1    A2   </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> rs3094315   0.289 <span style="text-decoration: underline;">126</span>849 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> rs3131972   0.269 <span style="text-decoration: underline;">126</span>849 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> rs3131969  -<span style="color: #BB0000;">0.074</span> <span style="text-decoration: underline;">126</span>849 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> rs1048488   0.273 <span style="text-decoration: underline;">126</span>849 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> rs3115850   0.263 <span style="text-decoration: underline;">126</span>849 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> rs2286139   0.034 <span style="text-decoration: underline;">126</span>849 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> rs12562034  0.346 <span style="text-decoration: underline;">118</span>583 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> rs4040617   0.13  <span style="text-decoration: underline;">127</span>964 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> rs2980300  -<span style="color: #BB0000;">0.303</span> <span style="text-decoration: underline;">127</span>964 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> rs4970383  -<span style="color: #BB0000;">2.37</span>  <span style="text-decoration: underline;">114</span>957 A     G    </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 99,990 more rows</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="partitioned-heritability">Partitioned heritability<a class="anchor" aria-label="anchor" href="#partitioned-heritability"></a>
@@ -160,7 +185,7 @@ partitioned ldscore files <code>ld.parquet</code> and
 overlapping annotations, the functionality to adjust the enrichment
 estimate has not yet been implemented. Therefore the enrichment estimate
 should not be used.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/partitioned_h2.html">partitioned_h2</a></span><span class="op">(</span></span>
 <span>  <span class="va">sumstat1</span>,</span>
 <span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"testdata/baseline"</span><span class="op">)</span></span>
@@ -179,7 +204,7 @@ Typically, we will have several different cell-types to test. We pass
 the annotations that should be in each model to
 <code>covariate_dir</code>, and the ldscores for the cell-type to
 ldscore_dir</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/celltype_analysis.html">celltype_analysis</a></span><span class="op">(</span></span>
 <span>  <span class="va">sumstat1</span>,</span>
 <span>  covariate_dir <span class="op">=</span> <span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"testdata/baseline"</span><span class="op">)</span>,</span>
