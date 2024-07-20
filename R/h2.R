@@ -4,19 +4,19 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
 #'
 #' @description
 #' An R implementation of the LD score regression method to estimate SNP heritability,
-#' mimicking `ldsc --h2` from the [ldsc](https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation) package. 
-#' 
+#' mimicking `ldsc --h2` from the [ldsc](https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation) package.
+#'
 #' LDscores for the European subset of 1000g (2015 release) for 1,290,028 HapMap3 SNPs (with 1,173,569 SNPs with freq > 5%)
-#' are bundled within the ldsR package and are used by default. This corresponds to the `eur_w_ld_chr` folder 
-#' previously shared at the LDSC [github](https://github.com/bulik/ldsc). 
-#' 
-#' You can inspect the LDscores used by default: 
+#' are bundled within the ldsR package and are used by default. This corresponds to the `eur_w_ld_chr` folder
+#' previously shared at the LDSC [github](https://github.com/bulik/ldsc).
+#'
+#' You can inspect the LDscores used by default:
 #' `arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))`
 #'
 #' ldsc_h2 does not perform any quality control on the input summary statistics, except to merge with the
-#' 1,290,028 HapMap3 SNPs in the reference panel. See the [munge()] function to mimic the `munge_sumstats.py` function. 
+#' 1,290,028 HapMap3 SNPs in the reference panel. See the [munge()] function to mimic the `munge_sumstats.py` function.
 #'
-#' 
+#'
 #'
 #'
 #' @param sumstat A [dplyr::tibble()] with columns `SNP`, `Z` and `N`
@@ -27,14 +27,14 @@ utils::globalVariables(c("annot", "m50", "SNP", "coef", "coef_se", "z", "L2"))
 #' @return a [dplyr::tibble()] with columns `h2` and `h2_se`
 #' @export
 #'
-#' @examples 
+#' @examples
 #' p <- system.file("extdata", "eur_w_ld.parquet", package = "ldsR")
 #' snps <- arrow::read_parquet(p, col_select = c("SNP"))
 #' snps$N <- 130000
 #' snps$Z <- rnorm(nrow(snps))
 #' ldsc_h2(snps)
-#' 
-#' 
+#'
+#'
 ldsc_h2 <- function(sumstat, weights=NULL, M=NULL, n_blocks = 200) {
   req_cols <- c("SNP", "Z", "N")
   stopifnot("sumstat has to be a data.frame or tbl" = "data.frame" %in% class(sumstat))
@@ -92,31 +92,31 @@ ldsc_h2 <- function(sumstat, weights=NULL, M=NULL, n_blocks = 200) {
 
 
 
-#' Estimate partitioned SNP heritability 
+#' Estimate partitioned SNP heritability
 #'
 #' @description
 #' An R implementation of the LD score regression method to estimate SNP heritability,
-#' mimicking `ldsc --h2` from the [ldsc](https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation) package. 
-#' 
+#' mimicking `ldsc --h2` from the [ldsc](https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation) package.
+#'
 #' For partitioned heritablity, the noMHC weights are used instead of the eur_w_ld_chr weights.
-#' 
+#'
 #' You can inspect the LDscores used by default, in the column `L2_celltype`
 #' `arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"))`
 #'
 #' partitioned_heritability does not perform any quality control on the input summary statistics, except to merge with the
-#' SNPs in the reference panel. See the [munge()] function to mimic the `munge_sumstats.py` function. 
+#' SNPs in the reference panel. See the [munge()] function to mimic the `munge_sumstats.py` function.
 #'
-#' @inheritParams ldsc_h2 
+#' @inheritParams ldsc_h2
 #' @param ldscore_dir filepath to a directory with the `annot.parquet` and `ldscores.parquet` files
 #'
-#' @return a [dplyr::tibble()] 
+#' @return a [dplyr::tibble()]
 #' @export
 #'
 #' @examples \dontrun{
 #' partitioned_heritability(sumstats, "path/to_dir/")
 #' }
-#' 
-#' 
+#'
+#'
 partitioned_h2 <- function(sumstat, ldscore_dir, weights = NULL, n_blocks=200) {
   stopifnot("sumstat has to be a data.frame or tbl" = "data.frame" %in% class(sumstat))
   check_columns(c("SNP", "Z", "N"), sumstat)
@@ -149,7 +149,7 @@ partitioned_h2 <- function(sumstat, ldscore_dir, weights = NULL, n_blocks=200) {
   res <- ldscore(y = merged$Z^2, x = x, w = merged$L2, N = merged$N, M = as.double(covar_M), n_blocks=n_blocks)
 
 
-  
+
     dplyr::tibble(
       annot = names(res$coef_se),
       coef = res$coef,
@@ -161,7 +161,7 @@ partitioned_h2 <- function(sumstat, ldscore_dir, weights = NULL, n_blocks=200) {
       tot_se = res$tot_se
     ) |>
       dplyr::arrange(dplyr::desc(z))
-  
+
 }
 
 
@@ -176,14 +176,14 @@ partitioned_h2 <- function(sumstat, ldscore_dir, weights = NULL, n_blocks=200) {
 
 
 #' Perform cell-type analysis using partitioned heritability
-#' 
+#'
 #' @description
 #' A common usage of partitioned heritability is to estimate enrichment and significance for
 #' an annotation typical for a specific cell-type.
 #' For this analysis, it is useful to adjust for a baseline set of annotations, and then estimate the association for a large set of annotations ("cell-types")
-#' 
 #'
-#' @inheritParams partitioned_heritability
+#'
+#' @inheritParams partitioned_h2
 #' @param covariate_dir a directory containing the files `ld.parquet` and `annot.parquet`
 #'
 #' @return a [dplyr::tibble()]
@@ -273,7 +273,7 @@ celltype_analysis <- function(sumstat, covariate_dir, ldscore_dir, weights = NUL
       tot = res$tot,
       tot_se = res$tot_se
     ) |>
-      dplyr::arrange(dplyr::desc(abs(z))) |> 
+      dplyr::arrange(dplyr::desc(abs(z))) |>
       dplyr::filter(annot == celltype)
 
 }

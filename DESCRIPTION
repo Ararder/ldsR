@@ -26,3 +26,4 @@ RoxygenNote: 7.3.2.9000
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/Ararder/ldsR, http://arvidharder.com/ldsR/
 BugReports: https://github.com/Ararder/ldsR/issues
+Config/Needs/website: rmarkdown

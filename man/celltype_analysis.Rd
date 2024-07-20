@@ -7,7 +7,13 @@
 celltype_analysis(sumstat, covariate_dir, ldscore_dir, weights = NULL)
 }
 \arguments{
+\item{sumstat}{A \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{SNP}, \code{Z} and \code{N}}
+
 \item{covariate_dir}{a directory containing the files \code{ld.parquet} and \code{annot.parquet}}
+
+\item{ldscore_dir}{filepath to a directory with the \code{annot.parquet} and \code{ldscores.parquet} files}
+
+\item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 }
 \value{
 a \code{\link[dplyr:reexports]{dplyr::tibble()}}
