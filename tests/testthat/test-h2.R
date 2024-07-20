@@ -20,6 +20,21 @@ test_that("ldsc_h2 runs and reproduces LDSC for bip", {
 
 })
 
+test_that("benchmark and profile h2", {
+  skip()
+  s1 <- dplyr::select(testdata, SNP, Z = Z.y, N = N.y)
+  
+  bench <- microbenchmark::microbenchmark(
+    ldsc_h2(s1),
+    times = 10L
+  )
+  
+  time <- profvis::profvis(ldsc_h2(s1))
+  
+
+
+})
+
 test_that("partitioned heritability runs and reproduces results", {
   
   s1 <- dplyr::select(testdata, SNP, Z = Z.x, N = N.x)

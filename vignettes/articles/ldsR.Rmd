@@ -88,6 +88,12 @@ ldsc_rg(sumstat1, sumstats)
         
 ```
 
+# Munge
+The `munge()` function can be used to mimic some of the filters of the munge_sumstats.py file from ldsc.
+```{r}
+munge(sumstat1)
+```
+
 # Partitioned heritability
 
 To estimate the partitioned heritability, `partitioned_h2()` is
