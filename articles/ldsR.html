@@ -59,9 +59,6 @@
 
     
     
-<table class="table"><tbody><tr class="odd">
-<td>tle: “ldsR”</td>
-</tr></tbody></table>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Ararder/ldsR" class="external-link">ldsR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://testthat.r-lib.org" class="external-link">testthat</a></span><span class="op">)</span></span>
@@ -69,10 +66,15 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>ldsR was designed to provide access to the main functions of the ldsc
-python package inside R. An often cumbersome part of working with
-summary statistics is the need to switch between R, Python and the
-command line. This package moves some of that work to inside R.</p>
+<p>ldsR exposes six functions: 1. <code><a href="../reference/celltype_analysis.html">celltype_analysis()</a></code> to
+estimate partitioned heritability for many annotations one at a time 2.
+<code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code> to estimate heritability for a single trait 3.
+<code><a href="../reference/ldsc_rg.html">ldsc_rg()</a></code> to estimate the genetic correlation between two
+traits 4. <code><a href="../reference/munge.html">munge()</a></code> to apply quality control filters to a
+summary statistics file 5. <code><a href="../reference/parse_gwas.html">parse_gwas()</a></code> a function to read
+in summary statistics in the many different formats they can be found in
+the wild. 6. <code><a href="../reference/partitioned_h2.html">partitioned_h2()</a></code> to estimate partitioned
+heritability</p>
 </div>
 <div class="section level2">
 <h2 id="use-ldsr-to-directly-estimate-heritability-inside-r">Use ldsR to directly estimate heritability inside R<a class="anchor" aria-label="anchor" href="#use-ldsr-to-directly-estimate-heritability-inside-r"></a>
@@ -136,10 +138,10 @@ saved in the <code>trait2</code> column.</p>
 <span>          </span>
 <span><span class="fu"><a href="../reference/ldsc_rg.html">ldsc_rg</a></span><span class="op">(</span><span class="va">sumstat1</span>, <span class="va">sumstats</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
+<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 2/3 ETA:  2s | Computing genetic correlations...</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 2/3 ETA: 2s | Computing genetic correlations...</span></span>
+<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
+<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 14</span></span></span>
 <span><span class="co">#&gt;   trait2    rg  rg_se h2_trait1 h2_trait_se h2_trait2 h2_trait2_se  gcov gcov_se</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
