@@ -4,9 +4,6 @@ editor_options:
     wrap: 72
 ---
 
-|             |
-|-------------|
-| tle: "ldsR" |
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -23,10 +20,13 @@ library(fs)
 
 # Introduction
 
-ldsR was designed to provide access to the main functions of the ldsc
-python package inside R. An often cumbersome part of working with
-summary statistics is the need to switch between R, Python and the
-command line. This package moves some of that work to inside R.
+ldsR exposes six functions:
+1.  `celltype_analysis()` to estimate partitioned heritability for many annotations one at a time
+2.  `ldsc_h2()` to estimate heritability for a single trait
+3.  `ldsc_rg()` to estimate the genetic correlation between two traits
+4.  `munge()` to apply quality control filters to a summary statistics file
+5.  `parse_gwas()` a function to read in summary statistics in the many different formats they can be found in the wild.
+6.  `partitioned_h2()` to estimate partitioned heritability
 
 # Use ldsR to directly estimate heritability inside R
 
