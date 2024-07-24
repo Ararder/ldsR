@@ -20,23 +20,23 @@ test_that("ldsc_h2 runs and reproduces LDSC for bip", {
 
 })
 
-test_that("benchmark and profile h2", {
-  skip()
-  s1 <- dplyr::select(testdata, SNP, Z = Z.y, N = N.y)
-  
-  bench <- microbenchmark::microbenchmark(
-    ldsc_h2(s1),
-    times = 10L
-  )
-  
-  time <- profvis::profvis(ldsc_h2(s1))
-  
-
-
-})
+# test_that("benchmark and profile h2", {
+#   skip()
+#   s1 <- dplyr::select(testdata, SNP, Z = Z.y, N = N.y)
+#
+#   bench <- microbenchmark::microbenchmark(
+#     ldsc_h2(s1),
+#     times = 10L
+#   )
+#
+#   time <- profvis::profvis(ldsc_h2(s1))
+#
+#
+#
+# })
 
 test_that("partitioned heritability runs and reproduces results", {
-  
+
   s1 <- dplyr::select(testdata, SNP, Z = Z.x, N = N.x)
   res <- partitioned_h2(
     sumstat = s1,
@@ -44,12 +44,12 @@ test_that("partitioned heritability runs and reproduces results", {
   )
   expect_equal(res$tot[1], 0.3347495, tolerance = 1e-06)
 
-  
+
 
 })
 
 test_that("cell-type analysis runs and reproduces results", {
-  
+
   s1 <- dplyr::select(testdata, SNP, Z = Z.x, N = N.x)
   expect_no_error(
     res <- celltype_analysis(
@@ -58,9 +58,9 @@ test_that("cell-type analysis runs and reproduces results", {
      ldscore_dir = test_path("testdata/superclusters")
     )
   )
-  
 
-  
+
+
 
 })
 

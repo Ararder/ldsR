@@ -4,7 +4,6 @@ editor_options:
     wrap: 72
 ---
 
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -20,24 +19,31 @@ library(fs)
 
 # Introduction
 
-ldsR exposes six functions:
-1.  `celltype_analysis()` to estimate partitioned heritability for many annotations one at a time
-2.  `ldsc_h2()` to estimate heritability for a single trait
-3.  `ldsc_rg()` to estimate the genetic correlation between two traits
-4.  `munge()` to apply quality control filters to a summary statistics file
-5.  `parse_gwas()` a function to read in summary statistics in the many different formats they can be found in the wild.
-6.  `partitioned_h2()` to estimate partitioned heritability
+ldsR exposes five functions:
+
+1\. `celltype_analysis()` to estimate partitioned heritability for many
+annotations one at a time, while adjusting for a common set of
+annotations
+
+2\. `ldsc_h2()` to estimate heritability for a single trait
+
+3\. `ldsc_rg()` to estimate the genetic correlation between two traits
+
+4\. `munge()` to apply quality control filters to a summary statistics
+file
+
+6\. `partitioned_h2()` to estimate partitioned heritability - OBS,
+correct enrichemnt estimates for overlapping annotations has not yet
+been implemented.
 
 # Use ldsR to directly estimate heritability inside R
 
-Tired of preparing your files for ldsc? Use ldsR to directly estimate
-heritability inside R.
+Estimate heritability with one line inside R.
 
 `ldsc_h2()` has only one required argument, a dataframe with the columns
 `SNP`, `Z` and `N`. The `ref-ld-chr` and `w-ld-chr` files are shipped
 with the ldsR package, but you can also provide your own. By default
-the, ldsR uses the ldscores derived from the European subset of 1000
-Genomes.
+ldsR uses the ldscores derived from the European subset of 1000 Genomes.
 
 ```{r}
 # example file, 100 000 rows to be lightweight.
@@ -89,7 +95,10 @@ ldsc_rg(sumstat1, sumstats)
 ```
 
 # Munge
-The `munge()` function can be used to mimic some of the filters of the munge_sumstats.py file from ldsc.
+
+The `munge()` function can be used to mimic some of the filters of the
+munge_sumstats.py file from ldsc.
+
 ```{r}
 munge(sumstat1)
 ```
@@ -104,32 +113,30 @@ annotations, the functionality to adjust the enrichment estimate has not
 yet been implemented. Therefore the enrichment estimate should not be
 used.
 
-
-
-```{r, eval = FALSE}
+```{r}
 partitioned_h2(
   sumstat1,
-  ldscore_dir = test_path("testdata/baseline")
+  ldscore_dir = system.file("extdata", "baseline1.1_test", package = "ldsR")
 )
 ```
 
 # Cell-type analysis
-Another common usage is a version of partitioned heritability sometimes referred to 
-as "cell-type analysis".
-Here we would like to estimate the significance of a heritability enrichment in a specific
-set of genomic locations (for example specifically expressed genes in neurons), while
-adjusting for another set of of annotations (all genes, genes expressed in brain, 
-transcription factor binding sites etc). Typically, we will have several different
-cell-types to test. We pass the annotations that should be in each model to
-`covariate_dir`, and the ldscores for the cell-type to ldscore_dir
 
+Another common usage is a version of partitioned heritability sometimes
+referred to as "cell-type analysis". Here we would like to estimate the
+significance of a heritability enrichment in a specific set of genomic
+locations (for example specifically expressed genes in neurons), while
+adjusting for another set of of annotations (all genes, genes expressed
+in brain, transcription factor binding sites etc). Typically, we will
+have several different cell-types to test. We pass the annotations that
+should be in each model to `covariate_dir`, and the ldscores for the
+cell-type to ldscore_dir
 
 ```{r, eval=FALSE}
 celltype_analysis(
   sumstat1,
-  covariate_dir = test_path("testdata/baseline"),
-  ldscore_dir = test_path("testdata/superclusters")
+  covariate_dir = system.file("extdata", "baseline1.1_test", package = "ldsR"),
+  ldscore_dir = system.file("extdata", "superclusters", package = "ldsR")
 )
 
 ```
-
