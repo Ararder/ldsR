@@ -66,26 +66,29 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>ldsR exposes six functions: 1. <code><a href="../reference/celltype_analysis.html">celltype_analysis()</a></code> to
-estimate partitioned heritability for many annotations one at a time 2.
-<code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code> to estimate heritability for a single trait 3.
-<code><a href="../reference/ldsc_rg.html">ldsc_rg()</a></code> to estimate the genetic correlation between two
-traits 4. <code><a href="../reference/munge.html">munge()</a></code> to apply quality control filters to a
-summary statistics file 5. <code><a href="../reference/parse_gwas.html">parse_gwas()</a></code> a function to read
-in summary statistics in the many different formats they can be found in
-the wild. 6. <code><a href="../reference/partitioned_h2.html">partitioned_h2()</a></code> to estimate partitioned
-heritability</p>
+<p>ldsR exposes five functions:</p>
+<p>1. <code><a href="../reference/celltype_analysis.html">celltype_analysis()</a></code> to estimate partitioned
+heritability for many annotations one at a time, while adjusting for a
+common set of annotations</p>
+<p>2. <code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code> to estimate heritability for a single
+trait</p>
+<p>3. <code><a href="../reference/ldsc_rg.html">ldsc_rg()</a></code> to estimate the genetic correlation between
+two traits</p>
+<p>4. <code><a href="../reference/munge.html">munge()</a></code> to apply quality control filters to a summary
+statistics file</p>
+<p>6. <code><a href="../reference/partitioned_h2.html">partitioned_h2()</a></code> to estimate partitioned heritability
+- OBS, correct enrichemnt estimates for overlapping annotations has not
+yet been implemented.</p>
 </div>
 <div class="section level2">
 <h2 id="use-ldsr-to-directly-estimate-heritability-inside-r">Use ldsR to directly estimate heritability inside R<a class="anchor" aria-label="anchor" href="#use-ldsr-to-directly-estimate-heritability-inside-r"></a>
 </h2>
-<p>Tired of preparing your files for ldsc? Use ldsR to directly estimate
-heritability inside R.</p>
+<p>Estimate heritability with one line inside R.</p>
 <p><code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code> has only one required argument, a dataframe
 with the columns <code>SNP</code>, <code>Z</code> and <code>N</code>.
 The <code>ref-ld-chr</code> and <code>w-ld-chr</code> files are shipped
 with the ldsR package, but you can also provide your own. By default
-the, ldsR uses the ldscores derived from the European subset of 1000
+ldsR uses the ldscores derived from the European subset of 1000
 Genomes.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># example file, 100 000 rows to be lightweight.</span></span>
@@ -190,8 +193,17 @@ should not be used.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/partitioned_h2.html">partitioned_h2</a></span><span class="op">(</span></span>
 <span>  <span class="va">sumstat1</span>,</span>
-<span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"testdata/baseline"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed 449 rows after merging with weights</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed 5961 rows after merging with ldscores</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt;   annot                            coef coef_se enrich   prop     z   tot tot_se</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Conserved_LindbladToh.bedL2   8.54<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 2.55<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 18.2   0.021<span style="text-decoration: underline;">2</span>  3.35 0.339 0.038<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> baseL2                        2.65<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 8.51<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span>  0.563 0.827   3.12 0.339 0.038<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> H3K4me1_peaks_Trynka.bedL2    6.92<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 4.66<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span>  1.47  0.140   1.48 0.339 0.038<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Coding_UCSC.bedL2            -<span style="color: #BB0000;">2.28</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 1.61<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> -<span style="color: #BB0000;">4.85</span>  0.011<span style="text-decoration: underline;">8</span> -<span style="color: #BB0000;">1.42</span> 0.339 0.038<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="cell-type-analysis">Cell-type analysis<a class="anchor" aria-label="anchor" href="#cell-type-analysis"></a>
@@ -209,8 +221,8 @@ ldscore_dir</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/celltype_analysis.html">celltype_analysis</a></span><span class="op">(</span></span>
 <span>  <span class="va">sumstat1</span>,</span>
-<span>  covariate_dir <span class="op">=</span> <span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"testdata/baseline"</span><span class="op">)</span>,</span>
-<span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"testdata/superclusters"</span><span class="op">)</span></span>
+<span>  covariate_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span>,</span>
+<span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"superclusters"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
