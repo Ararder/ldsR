@@ -103,6 +103,30 @@ munge_sumstats.py file from ldsc.
 munge(sumstat1)
 ```
 
+# The updated ldscore format
+
+ldsR uses an updated format for ldscores, to reduce size and file
+complexity. To run [partitioned_h2()] or [celltype_analysis()], you
+provide a filepath to a directory containing two files: `ld.parquet` and
+`annot.parquet`.
+
+```{r}
+fs::dir_tree(system.file("extdata", "baseline1.1_test", package = "ldsR"))
+
+```
+
+## ld.parquet
+`ld.parquet` contains the LD scores for each annotation
+```{r}
+arrow::read_parquet(system.file("extdata", "baseline1.1_test/ld.parquet", package = "ldsR")) |> dplyr::slice_head(n = 5)
+```
+
+## annot.parquet
+`annot.parquet` contains the annotations and M50 and M values.
+```{r}
+arrow::read_parquet(system.file("extdata", "baseline1.1_test/annot.parquet", package = "ldsR")) |> dplyr::slice_head(n = 5) 
+```
+
 # Partitioned heritability
 
 To estimate the partitioned heritability, `partitioned_h2()` is
@@ -123,16 +147,16 @@ partitioned_h2(
 # Cell-type analysis
 
 Another common usage is a version of partitioned heritability sometimes
-referred to as "cell-type analysis". Here we would like to estimate the
-significance of a heritability enrichment in a specific set of genomic
-locations (for example specifically expressed genes in neurons), while
-adjusting for another set of of annotations (all genes, genes expressed
-in brain, transcription factor binding sites etc). Typically, we will
-have several different cell-types to test. We pass the annotations that
-should be in each model to `covariate_dir`, and the ldscores for the
-cell-type to ldscore_dir
+referred to as "cell-type analysis".
 
-```{r, eval=FALSE}
+For [celltype_analysis()] one extra argument is required:
+`covariate_dir`. `covariate_dir` will be used to read in a set of
+LDscores that will be used as covariates when estimating heritability
+enrichment. The ldscores in `ldscores_dir` will be used to estimate the
+enrichment for each annotation, one at a time, while adjusting for *all*
+annotations in `covariate_dir`.
+
+```{r}
 celltype_analysis(
   sumstat1,
   covariate_dir = system.file("extdata", "baseline1.1_test", package = "ldsR"),

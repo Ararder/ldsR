@@ -3,5 +3,6 @@
 export(celltype_analysis)
 export(ldsc_h2)
 export(ldsc_rg)
+export(liability_h2)
 export(munge)
 export(partitioned_h2)

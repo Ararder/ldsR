@@ -5,13 +5,13 @@
 <!-- badges: end -->
 
 The core functions of the [ldsc python package](https://github.com/bulik/ldsc) such as 
-estimating heritability, intercept, genetic correlations and partitioned heritability are extremely common in the analysis of genetic data. 
+estimating heritability, intercept, genetic correlations and partitioned heritability 
+are ubiquitous in the analysis of genetic data. 
 
-However, the interface to these functions are no longer user friendly with difficulties in installation of python 2.7 dependencies and getting the nessecary reference data.
-
-In addition, R is commonly used for the everyday tasks of inspecting, munging and working with data, making it time costly to swap to a command line interface for analysis that takes seconds. 
-
-Here we introduce the core ldsc algorithms rewritten in R and make the most common reference data available within the R package making the estimation of genetic correlations, heritability, intercept and partitioned heritabiliy easier than ever.
+However, the LDSC github is not maintained, and the original python version (2.7) id deprecated.
+Here we introduce the core ldsc algorithms rewritten in R and make the most 
+common reference data available within the R package making the estimation of 
+genetic correlations, heritability, intercept and partitioned heritabiliy easier than ever.
 
 Compare the code to estimate heritability with ldsc using the command line interface with ldsR:
 
