@@ -41,7 +41,7 @@ SNPs in the reference panel. See the munge() function to mimic the munge_sumstat
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Estimate partitioned SNP heritability</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Ararder/ldsR/blob/main/R/h2.R" class="external-link"><code>R/h2.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Ararder/ldsR/blob/main/R/partitioned_h2.R" class="external-link"><code>R/partitioned_h2.R</code></a></small>
       <div class="d-none name"><code>partitioned_h2.Rd</code></div>
     </div>
 
@@ -87,9 +87,25 @@ SNPs in the reference panel. See the <code><a href="munge.html">munge()</a></cod
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="fu">partitioned_heritability</span><span class="op">(</span><span class="va">sumstats</span>, <span class="st">"path/to_dir/"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sumstat1</span> <span class="op">&lt;-</span> <span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sumstats.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">SNP</span>, Z <span class="op">=</span> <span class="va">Z.x</span>, N<span class="op">=</span><span class="va">N.x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ldscore_dir</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_tree.html" class="external-link">dir_tree</a></span><span class="op">(</span><span class="va">ldscore_dir</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">/home/runner/work/_temp/Library/ldsR/extdata/baseline1.1_test</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ├── annot.parquet</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> └── ld.parquet</span>
+<span class="r-in"><span><span class="fu">partitioned_h2</span><span class="op">(</span><span class="va">sumstat1</span>, ldscore_dir <span class="op">=</span> <span class="va">ldscore_dir</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Removed 449 rows after merging with weights</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Removed 5961 rows after merging with ldscores</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   annot                            coef coef_se enrich   prop     z   tot tot_se</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Conserved_LindbladToh.bedL2   8.54<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 2.55<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 18.2   0.021<span style="text-decoration: underline;">2</span>  3.35 0.339 0.038<span style="text-decoration: underline;">0</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> baseL2                        2.65<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 8.51<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span>  0.563 0.827   3.12 0.339 0.038<span style="text-decoration: underline;">0</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> H3K4me1_peaks_Trynka.bedL2    6.92<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 4.66<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span>  1.47  0.140   1.48 0.339 0.038<span style="text-decoration: underline;">0</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Coding_UCSC.bedL2            -<span style="color: #BB0000;">2.28</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 1.61<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> -<span style="color: #BB0000;">4.85</span>  0.011<span style="text-decoration: underline;">8</span> -<span style="color: #BB0000;">1.42</span> 0.339 0.038<span style="text-decoration: underline;">0</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

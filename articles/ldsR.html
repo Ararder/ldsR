@@ -141,10 +141,10 @@ saved in the <code>trait2</code> column.</p>
 <span>          </span>
 <span><span class="fu"><a href="../reference/ldsc_rg.html">ldsc_rg</a></span><span class="op">(</span><span class="va">sumstat1</span>, <span class="va">sumstats</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  </span></span>
+<span><span class="co">#&gt; ⠙ 2/3 ETA:  2s | Computing genetic correlations...</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
+<span><span class="co">#&gt; ⠙ 2/3 ETA: 2s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 14</span></span></span>
 <span><span class="co">#&gt;   trait2    rg  rg_se h2_trait1 h2_trait_se h2_trait2 h2_trait2_se  gcov gcov_se</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -180,6 +180,52 @@ filters of the munge_sumstats.py file from ldsc.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 99,990 more rows</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="the-updated-ldscore-format">The updated ldscore format<a class="anchor" aria-label="anchor" href="#the-updated-ldscore-format"></a>
+</h2>
+<p>ldsR uses an updated format for ldscores, to reduce size and file
+complexity. To run [partitioned_h2()] or [celltype_analysis()], you
+provide a filepath to a directory containing two files:
+<code>ld.parquet</code> and <code>annot.parquet</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_tree.html" class="external-link">dir_tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">/home/runner/work/_temp/Library/ldsR/extdata/baseline1.1_test</span></span></span>
+<span><span class="co">#&gt; ├── annot.parquet</span></span>
+<span><span class="co">#&gt; └── ld.parquet</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="ld-parquet">ld.parquet<a class="anchor" aria-label="anchor" href="#ld-parquet"></a>
+</h3>
+<p><code>ld.parquet</code> contains the LD scores for each
+annotation</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test/ld.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 5</span></span></span>
+<span><span class="co">#&gt;   SNP     baseL2 Coding_UCSC.bedL2 Conserved_LindbladTo…¹ H3K4me1_peaks_Trynka…²</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> rs3094…   80.8             0.175                  0.392                   30.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> rs3131…   80.9             0.18                   0.394                   30.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> rs3131…   90.3             0.312                  0.519                   34.6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> rs1048…   80.7             0.177                  0.394                   30.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> rs3115…   80.5             0.144                  0.374                   30.6</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated names: ¹​Conserved_LindbladToh.bedL2,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ²​H3K4me1_peaks_Trynka.bedL2</span></span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="annot-parquet">annot.parquet<a class="anchor" aria-label="anchor" href="#annot-parquet"></a>
+</h3>
+<p><code>annot.parquet</code> contains the annotations and M50 and M
+values.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test/annot.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
+<span><span class="co">#&gt;   annot                           m50       m</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> baseL2                      5<span style="text-decoration: underline;">961</span>159 9<span style="text-decoration: underline;">997</span>231</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Coding_UCSC.bedL2             <span style="text-decoration: underline;">85</span>095  <span style="text-decoration: underline;">160</span>751</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Conserved_LindbladToh.bedL2  <span style="text-decoration: underline;">153</span>113  <span style="text-decoration: underline;">285</span>337</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> H3K4me1_peaks_Trynka.bedL2  1<span style="text-decoration: underline;">012</span>339 1<span style="text-decoration: underline;">734</span>918</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
 <h2 id="partitioned-heritability">Partitioned heritability<a class="anchor" aria-label="anchor" href="#partitioned-heritability"></a>
 </h2>
 <p>To estimate the partitioned heritability,
@@ -190,7 +236,7 @@ partitioned ldscore files <code>ld.parquet</code> and
 overlapping annotations, the functionality to adjust the enrichment
 estimate has not yet been implemented. Therefore the enrichment estimate
 should not be used.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/partitioned_h2.html">partitioned_h2</a></span><span class="op">(</span></span>
 <span>  <span class="va">sumstat1</span>,</span>
 <span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span>
@@ -209,21 +255,28 @@ should not be used.</p>
 <h2 id="cell-type-analysis">Cell-type analysis<a class="anchor" aria-label="anchor" href="#cell-type-analysis"></a>
 </h2>
 <p>Another common usage is a version of partitioned heritability
-sometimes referred to as “cell-type analysis”. Here we would like to
-estimate the significance of a heritability enrichment in a specific set
-of genomic locations (for example specifically expressed genes in
-neurons), while adjusting for another set of of annotations (all genes,
-genes expressed in brain, transcription factor binding sites etc).
-Typically, we will have several different cell-types to test. We pass
-the annotations that should be in each model to
-<code>covariate_dir</code>, and the ldscores for the cell-type to
-ldscore_dir</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+sometimes referred to as “cell-type analysis”.</p>
+<p>For [celltype_analysis()] one extra argument is required:
+<code>covariate_dir</code>. <code>covariate_dir</code> will be used to
+read in a set of LDscores that will be used as covariates when
+estimating heritability enrichment. The ldscores in
+<code>ldscores_dir</code> will be used to estimate the enrichment for
+each annotation, one at a time, while adjusting for <em>all</em>
+annotations in <code>covariate_dir</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/celltype_analysis.html">celltype_analysis</a></span><span class="op">(</span></span>
 <span>  <span class="va">sumstat1</span>,</span>
 <span>  covariate_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span>,</span>
 <span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"superclusters"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed 0 rows after merging with ldscores</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt;   annot                     coef      coef_se enrich   prop      z   tot tot_se</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> amygdala_excitatory    3.02<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 0.000<span style="text-decoration: underline;">000</span>017<span style="text-decoration: underline;">4</span>  0.724 0.112   1.74  0.339 0.036<span style="text-decoration: underline;">1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> astrocyte             -<span style="color: #BB0000;">1.45</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 0.000<span style="text-decoration: underline;">000</span>016<span style="text-decoration: underline;">0</span> -<span style="color: #BB0000;">0.338</span> 0.090<span style="text-decoration: underline;">0</span> -<span style="color: #BB0000;">0.911</span> 0.341 0.038<span style="text-decoration: underline;">7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> bergmann_glia          4.39<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span> 0.000<span style="text-decoration: underline;">000</span>015<span style="text-decoration: underline;">4</span>  0.101 0.088<span style="text-decoration: underline;">1</span>  0.286 0.346 0.038<span style="text-decoration: underline;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> cerebellar_inhibitory -<span style="color: #BB0000;">1.78</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 0.000<span style="text-decoration: underline;">000</span>013<span style="text-decoration: underline;">9</span> -<span style="color: #BB0000;">0.410</span> 0.087<span style="text-decoration: underline;">4</span> -<span style="color: #BB0000;">1.29</span>  0.343 0.039<span style="text-decoration: underline;">1</span></span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

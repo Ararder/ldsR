@@ -45,7 +45,7 @@ ldsc_h2 does not perform any quality control on the input summary statistics, ex
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Estimate SNP heritability using LDscore regression for a single annotation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Ararder/ldsR/blob/main/R/h2.R" class="external-link"><code>R/h2.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Ararder/ldsR/blob/main/R/ldsc_h2.R" class="external-link"><code>R/ldsc_h2.R</code></a></small>
       <div class="d-none name"><code>ldsc_h2.Rd</code></div>
     </div>
 
@@ -63,7 +63,14 @@ previously shared at the LDSC <a href="https://github.com/bulik/ldsc" class="ext
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ldsc_h2</span><span class="op">(</span><span class="va">sumstat</span>, weights <span class="op">=</span> <span class="cn">NULL</span>, M <span class="op">=</span> <span class="cn">NULL</span>, n_blocks <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ldsc_h2</span><span class="op">(</span></span>
+<span>  <span class="va">sumstat</span>,</span>
+<span>  pop_prev <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample_prev <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  M <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_blocks <span class="op">=</span> <span class="fl">200</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,6 +79,15 @@ previously shared at the LDSC <a href="https://github.com/bulik/ldsc" class="ext
 
 <dl><dt id="arg-sumstat">sumstat<a class="anchor" aria-label="anchor" href="#arg-sumstat"></a></dt>
 <dd><p>A <code><a href="https://dplyr.tidyverse.org/reference/reexports.html" class="external-link">dplyr::tibble()</a></code> with columns <code>SNP</code>, <code>Z</code> and <code>N</code></p></dd>
+
+
+<dt id="arg-pop-prev">pop_prev<a class="anchor" aria-label="anchor" href="#arg-pop-prev"></a></dt>
+<dd><p>prevalence of the disorder in the general population</p></dd>
+
+
+<dt id="arg-sample-prev">sample_prev<a class="anchor" aria-label="anchor" href="#arg-sample-prev"></a></dt>
+<dd><p>the prevalence of the disorder in the sample.
+Default value is 0.5, reflecting a case-control study using effective N as sample size</p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
