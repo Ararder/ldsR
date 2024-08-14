@@ -25,13 +25,15 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   req_columns <- c("SNP", "Z", "N", "A1", "A2")
   check_columns(req_columns, dset)
 
+  snp_ref <- arrow::read_parquet(system.file("extdata", "eur_w_ld.parquet", package = "ldsR"), col_select = "SNP")
+
   before <- nrow(dset)
-  step1 <- dplyr::distinct(dset, SNP, .keep_all = TRUE)
-  cli::cli_alert_warning("Removed {before - nrow(step1)} rows with duplicated RSIDs")
+  step1 <- dplyr::filter(dset, SNP %in% snp_ref$SNP)
+  cli::cli_alert_warning("Removed {before - nrow(step1)} rows after filtering on reference panel")
 
 
   if("INFO" %in% colnames(dset)) {
-    before <- nrow(dset)
+    before <- nrow(step1)
     step1 <- dplyr::filter(step1, INFO > info_filter)
     cli::cli_alert_warning("Removed {before - nrow(step1)} rows with INFO below {info_filter}")
   }
@@ -42,10 +44,19 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
     cli::cli_alert_warning("Removed {before - nrow(step1)} rows with MAF below {maf_filter}")
   }
 
+
+  # Filter on Unique RSID
+  before <- nrow(step1)
+  step1 <- dplyr::distinct(step1, SNP, .keep_all = TRUE)
+  cli::cli_alert_warning("Removed {before - nrow(step1)} rows with duplicated RSIDs")
+
+
+  # Strand ambigius SNPS
   before <- nrow(step1)
   step1 <- remove_strand_ambig(step1)
   cli::cli_alert_warning("Removed {before - nrow(step1)} rows due to strand ambigious alleles")
 
+  # Large deviation in sample size
   before <- nrow(step1)
   N_filter <- round(stats::quantile(step1$N, 0.9) / 1.5)
   step1 <- dplyr::filter(step1, N > N_filter)
