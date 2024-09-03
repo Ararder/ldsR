@@ -2,7 +2,7 @@ utils::globalVariables(c("B","SE", "Z"))
 #' Parse GWAS format of [tidyGWAS::tidyGWAS()]
 #'
 #' @param tbl a [dplyr::tibble()]
-#' @param n Column name of sample s
+#' @param n Column name of sample size, default is "N".
 #'
 #' @return a munged [dplyr::tibble()]
 #' @export

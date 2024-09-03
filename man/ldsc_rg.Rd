@@ -34,7 +34,7 @@ snps <- arrow::read_parquet(path, col_select = c("SNP"))
 # to make example faster
 snps <- dplyr::slice_head(snps, n = 100000)
 snps$A1 <- "A"
-snps$A2 <- 
+snps$A2 <-
 snps$N <- 130000
 snps$Z <- rnorm(nrow(snps))
 snps2 <- snps

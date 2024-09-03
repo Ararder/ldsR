@@ -9,7 +9,7 @@ from_tidyGWAS(tbl, n = c("N", "EffectiveN"))
 \arguments{
 \item{tbl}{a \code{\link[dplyr:reexports]{dplyr::tibble()}}}
 
-\item{n}{Column name of sample s}
+\item{n}{Column name of sample size, default is "N".}
 }
 \value{
 a munged \code{\link[dplyr:reexports]{dplyr::tibble()}}
