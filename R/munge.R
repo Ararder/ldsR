@@ -31,6 +31,10 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
   step1 <- dplyr::filter(dset, SNP %in% snp_ref$SNP)
   cli::cli_alert_warning("Removed {before - nrow(step1)} rows after filtering on reference panel")
 
+  # check for non-RSIDs in SNP column
+  before <- nrow(step1)
+  step1 <- dplyr::filter(step1, stringr::str_detect(.data[["SNP"]], "^[rR][sS]?\\d{1,10}$"))
+  cli::cli_alert_warning("Removed {before - nrow(step1)} rows with non-RSIDs in SNP column")
 
   if("INFO" %in% colnames(dset)) {
     before <- nrow(step1)

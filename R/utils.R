@@ -18,3 +18,8 @@ liability_h2 <- function(obs_h2, pop_prev, sample_prev = 0.5) {
   obs_h2 * K^2 * ( 1 - K)^2 / P / (1-P) / zv^2
 
 }
+
+
+
+  dplyr::filter(tbl, stringr::str_detect(.data[["SNP"]], "^[rR][sS]?\\d{1,10}$"))
+
