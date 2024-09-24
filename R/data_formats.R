@@ -105,6 +105,17 @@ ldsc_to_parquet <- function(dir, annot_name) {
 }
 
 
+#' Transform LDSC formatted annotation ldscores to ldsR format
+#'
+#' @param dir directory with ldscores in LDSC format
+#' @param outdir directory to save the parquet files
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples \dontrun{
+#' ldsc_to_parquet2("path/to/ldsc", "path/to/outdir")
+#' }
 ldsc_to_parquet2 <- function(dir, outdir) {
   ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
     purrr::map(arrow::read_tsv_arrow, col_select = -c("CHR", "BP")) |>

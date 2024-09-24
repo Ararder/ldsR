@@ -12,7 +12,8 @@
 #' @param dset a [dplyr::tibble()] with columns `SNP`, `A1` `A2` `Z` `N` and
 #' optional columns `EAF` and `INFO`
 #' @param info_filter INFO score filter threshold at which to remove rows
-#' @param maf_filter  Minor allele frequenc filter at which to remove rows
+#' @param eaf_filter  effective allele filter at which to remove rows.
+#'  eaf_filter=0.01 would filter to eaf > 0.01 & eaf < 0.99
 #'
 #' @return a data.frame
 #' @export
@@ -20,7 +21,7 @@
 #' @examples \dontrun{
 #' parse_gwas(tbl)
 #' }
-munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
+munge <- function(dset, info_filter = 0.9, eaf_filter = 0.01) {
   stopifnot("data.frame" %in% class(dset))
   req_columns <- c("SNP", "Z", "N", "A1", "A2")
   check_columns(req_columns, dset)
@@ -33,7 +34,7 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
 
   # check for non-RSIDs in SNP column
   before <- nrow(step1)
-  step1 <- dplyr::filter(step1, stringr::str_detect(.data[["SNP"]], "^[rR][sS]?\\d{1,10}$"))
+  step1 <- dplyr::filter(step1, stringr::str_detect(SNP, "^[rR][sS]?\\d{1,10}$"))
   cli::cli_alert_warning("Removed {before - nrow(step1)} rows with non-RSIDs in SNP column")
 
   if("INFO" %in% colnames(dset)) {
@@ -44,8 +45,8 @@ munge <- function(dset, info_filter = 0.9, maf_filter = 0.01) {
 
   if("EAF" %in% colnames(dset)) {
     before <- nrow(step1)
-    step1 <- dplyr::filter(step1, EAF > maf_filter & EAF < (1-maf_filter))
-    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with MAF below {maf_filter}")
+    step1 <- dplyr::filter(step1, EAF > eaf_filter & EAF < (1-eaf_filter))
+    cli::cli_alert_warning("Removed {before - nrow(step1)} rows with EAF below {eaf_filter} and above {1-eaf_filter}")
   }
 
 

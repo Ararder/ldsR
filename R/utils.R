@@ -20,6 +20,3 @@ liability_h2 <- function(obs_h2, pop_prev, sample_prev = 0.5) {
 }
 
 
-
-  dplyr::filter(tbl, stringr::str_detect(.data[["SNP"]], "^[rR][sS]?\\d{1,10}$"))
-

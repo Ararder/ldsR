@@ -4,7 +4,7 @@
 \alias{munge}
 \title{Munge GWAS summary statistics}
 \usage{
-munge(dset, info_filter = 0.9, maf_filter = 0.01)
+munge(dset, info_filter = 0.9, eaf_filter = 0.01)
 }
 \arguments{
 \item{dset}{a \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{SNP}, \code{A1} \code{A2} \code{Z} \code{N} and
@@ -12,7 +12,8 @@ optional columns \code{EAF} and \code{INFO}}
 
 \item{info_filter}{INFO score filter threshold at which to remove rows}
 
-\item{maf_filter}{Minor allele frequenc filter at which to remove rows}
+\item{eaf_filter}{effective allele filter at which to remove rows.
+eaf_filter=0.01 would filter to eaf > 0.01 & eaf < 0.99}
 }
 \value{
 a data.frame
