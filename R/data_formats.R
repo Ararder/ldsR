@@ -218,6 +218,17 @@ get_snps <- function(dir) {
 
 }
 
+#' Convert the output of many LDscores to a single dataframe suitable for ldsR
+#'
+#' @param parent_dir a directory with subdirectories containing LDscore data
+#' @param outdir directory to save the parquet files
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples \dontrun{
+#' to_celltype_dataset("files/ldsc", "files/ldsc_parquet")
+#' }
 to_celltype_dataset <- function(parent_dir, outdir) {
   fs::dir_create(outdir)
   stopifnot(fs::dir_exists(parent_dir))

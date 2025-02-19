@@ -67,6 +67,88 @@ test_that("partitioned heritability runs and reproduces results", {
 test_that("cell-type analysis runs and reproduces results", {
   skip()
   s1 <- dplyr::select(testdata, SNP, Z = Z.x, N = N.x)
+
+  sumstat = s1
+  covariate_dir = test_path("testdata/baseline")
+  ldscore_dir = test_path("testdata/superclusters")
+
+
+  # -------------------------------------------------------------------------
+
+
+  req_cols <- c("SNP", "Z", "N")
+  stopifnot("SNP, Z and N are required in `sumstat`" = all(req_cols %in% colnames(sumstat)))
+  sumstat <- dplyr::select(sumstat, dplyr::all_of(req_cols))
+
+
+  if(is.null(weights)) {
+    weights <- arrow::read_parquet(system.file("extdata/eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2_celltype")) |>
+      dplyr::rename(L2 = "L2_celltype") |>
+      dplyr::filter(!is.na(L2))
+  }
+
+  covars <- parse_parquet_dir(covariate_dir)
+  covar_ld <- covars[["ld"]]
+  covar_M <- covars[["annot"]][["m50"]]
+
+  celltypes <- parse_parquet_dir(ldscore_dir)
+  celltypes_ld <- celltypes[["ld"]]
+  celltypes_M <- celltypes[["annot"]][["m50"]]
+  rm(covars, celltypes)
+
+
+  #### Merge sumstats with LDscores
+  n_snps_before <- nrow(sumstat)
+  merged <- dplyr::inner_join(weights, sumstat, by = "SNP") |>
+    dplyr::inner_join(covar_ld, by = "SNP") |>
+    dplyr::inner_join(celltypes_ld, by = "SNP")
+
+  diff <- nrow(sumstat) - n_snps_before
+  cli::cli_alert_info("Removed {.bold {diff}} rows after merging with ldscores")
+
+
+  ##
+  non_ldscores <- unique(c(colnames(sumstat),colnames(weights)))
+  celltype_ldscore_names <-  colnames(dplyr::select(celltypes_ld, -c("SNP")))
+
+
+
+  # -------------------------------------------------------------------------
+  i <- 1
+  celltype <- celltype_ldscore_names[i]
+  M = c(covar_M, celltypes_M[i])
+
+  celltype = celltype
+  merged = merged
+  M = c(covar_M, celltypes_M[i])
+  non_ldscores = non_ldscores
+  celltype_ldscore_names = celltype_ldscore_names
+
+
+  # -------------------------------------------------------------------------
+
+  cols_to_remove <- unique(c(non_ldscores, celltype_ldscore_names[!celltype_ldscore_names %in% celltype]))
+  x <- dplyr::select(merged,-dplyr::all_of(cols_to_remove)) |> as.matrix()
+  stopifnot("wrong dimensions between celltype ldscores and M"= length(M) == dim(x)[2])
+
+
+  res <- ldscore(
+    x = x,
+    y = merged$Z^2,
+    w = merged$L2,
+    N = merged$N,
+    M = M
+  )
+
+
+
+
+
+})
+
+test_that("cell-type analysis internal checks", {
+
+  s1 <- dplyr::select(testdata, SNP, Z = Z.x, N = N.x)
   expect_no_error(
     res <- celltype_analysis(
       sumstat = s1,
@@ -76,6 +158,7 @@ test_that("cell-type analysis runs and reproduces results", {
   )
 
 })
+
 
 
 

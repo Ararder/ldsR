@@ -156,7 +156,7 @@ prop <- function(jknife,cat,tot, Nbar, M) {
   denom_delete_vals <- matrix(rowSums(numer_delete_vals))
 
 
-  denom_delete_vals <- matrix(rep(denom_delete_vals, 53), nrow = 200, ncol = 53, byrow = FALSE)
+  denom_delete_vals <- matrix(rep(denom_delete_vals, n_annot), nrow = 200, ncol = n_annot, byrow = FALSE)
   ratio <- cat / tot
 
   pseudovalues <- matrix(nrow = n_blocks, ncol = n_annot)
