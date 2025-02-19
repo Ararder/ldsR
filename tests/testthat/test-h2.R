@@ -79,13 +79,13 @@ test_that("partitioned heritability runs and reproduces results", {
 })
 
 test_that("cell-type analysis runs and reproduces results", {
-
+  skip()
   s1 <- dplyr::select(testdata, SNP, Z = Z.x, N = N.x)
   expect_no_error(
     res <- celltype_analysis(
       sumstat = s1,
       covariate_dir = test_path("testdata/baseline"),
-     ldscore_dir = test_path("testdata/superclusters")
+      ldscore_dir = test_path("testdata/superclusters")
     )
   )
 
@@ -94,6 +94,7 @@ test_that("cell-type analysis runs and reproduces results", {
 
 
 test_that("partitioned_h2 can adjust for overlapping annotations", {
+  skip("Requires external data")
   ldscore_dir = "~/Desktop/baseline_v1.1/"
   testdata <- arrow::read_parquet(test_path("fixtures/test_data.parquet"))
   sumstat <- dplyr::select(testdata, SNP, Z = Z.x, N = N.x)

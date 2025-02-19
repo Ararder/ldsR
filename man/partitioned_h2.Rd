@@ -20,6 +20,8 @@ partitioned_h2(
 \item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 
 \item{n_blocks}{Number of blocks to use for the jackknife estimator}
+
+\item{overlapping_annotations}{are the annotations overlapping? In such a case, the estimate of the enrichment estimate needs to be adjusted.}
 }
 \value{
 a \code{\link[dplyr:reexports]{dplyr::tibble()}}

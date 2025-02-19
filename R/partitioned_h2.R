@@ -14,6 +14,7 @@
 #'
 #' @inheritParams ldsc_h2
 #' @param ldscore_dir filepath to a directory with the `annot.parquet` and `ldscores.parquet` files
+#' @param overlapping_annotations are the annotations overlapping? In such a case, the estimate of the enrichment estimate needs to be adjusted.
 #'
 #' @return a [dplyr::tibble()]
 #' @export
