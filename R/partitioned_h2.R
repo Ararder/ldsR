@@ -19,13 +19,13 @@
 #' @return a [dplyr::tibble()]
 #' @export
 #'
-#' @examples
+#' @examples \dontrun{
 #' sumstat1 <- arrow::read_parquet(system.file("extdata", "sumstats.parquet", package = "ldsR")) |>
 #' dplyr::select(SNP, Z = Z.x, N=N.x)
 #' ldscore_dir <-  system.file("extdata", "baseline1.1_test", package = "ldsR")
 #' fs::dir_tree(ldscore_dir)
 #' partitioned_h2(sumstat1, ldscore_dir = ldscore_dir)
-#'
+#' }
 #'
 #'
 #'

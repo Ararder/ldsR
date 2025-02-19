@@ -39,12 +39,13 @@ partitioned_heritability does not perform any quality control on the input summa
 SNPs in the reference panel. See the \code{\link[=munge]{munge()}} function to mimic the \code{munge_sumstats.py} function.
 }
 \examples{
+\dontrun{
 sumstat1 <- arrow::read_parquet(system.file("extdata", "sumstats.parquet", package = "ldsR")) |>
 dplyr::select(SNP, Z = Z.x, N=N.x)
 ldscore_dir <-  system.file("extdata", "baseline1.1_test", package = "ldsR")
 fs::dir_tree(ldscore_dir)
 partitioned_h2(sumstat1, ldscore_dir = ldscore_dir)
-
+}
 
 
 

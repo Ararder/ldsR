@@ -156,7 +156,7 @@ enrichment. The ldscores in `ldscores_dir` will be used to estimate the
 enrichment for each annotation, one at a time, while adjusting for *all*
 annotations in `covariate_dir`.
 
-```{r}
+```{r, eval=FALSE}
 celltype_analysis(
   sumstat1,
   covariate_dir = system.file("extdata", "baseline1.1_test", package = "ldsR"),

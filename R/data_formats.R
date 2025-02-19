@@ -51,13 +51,13 @@ read_overlap_matrix <- function(ldscore_dir, ordered=TRUE) {
       dplyr::select(-dplyr::any_of(c("SNP")))
 
     annots <- dplyr::bind_cols(annots, freq) |>
-      dplyr::filter(.data[["MAF"]] > 0.05) |>
+      dplyr::filter(dplyr::.data[["MAF"]] > 0.05) |>
       dplyr::select(-dplyr::any_of(c("MAF")))
 
   } else {
     annots <- arrow::read_parquet(fs::path(ldscore_dir, "annot_ref.parquet"))
     freq <- arrow::read_parquet(fs::path(ldscore_dir, "snp_freq.parquet"))
-    annots <- dplyr::semi_join(annots, dplyr::filter(freq, .data[["MAF"]] > 0.05), by = "SNP")
+    annots <- dplyr::semi_join(annots, dplyr::filter(freq, dplyr::.data[["MAF"]] > 0.05), by = "SNP")
     annots <- dplyr::select(annots,-dplyr::any_of(c("SNP", "CM")))
 
   }

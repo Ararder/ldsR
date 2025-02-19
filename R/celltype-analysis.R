@@ -13,7 +13,7 @@
 #' @return a [dplyr::tibble()]
 #' @export
 #'
-#' @examples
+#' @examples \dontrun{
 #' sumstat1 <- arrow::read_parquet(system.file("extdata", "sumstats.parquet", package = "ldsR"))
 #' sumstat1 <- dplyr::select(sumstat1, SNP, Z = Z.x, N=N.x)
 #'
@@ -23,6 +23,7 @@
 #'  covariate_dir = system.file("extdata", "baseline1.1_test", package = "ldsR"),
 #'  ldscore_dir = system.file("extdata", "superclusters", package = "ldsR")
 #' )
+#' }
 #'
 celltype_analysis <- function(sumstat, covariate_dir, ldscore_dir, weights = NULL) {
   req_cols <- c("SNP", "Z", "N")

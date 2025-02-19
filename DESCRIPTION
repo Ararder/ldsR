@@ -18,6 +18,7 @@ Imports:
     cli,
     dplyr,
     fs,
+    janitor,
     purrr,
     rlang (>= 1.1.0),
     stats,

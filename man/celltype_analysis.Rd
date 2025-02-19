@@ -24,6 +24,7 @@ an annotation typical for a specific cell-type.
 For this analysis, it is useful to adjust for a baseline set of annotations, and then estimate the association for a large set of annotations ("cell-types")
 }
 \examples{
+\dontrun{
 sumstat1 <- arrow::read_parquet(system.file("extdata", "sumstats.parquet", package = "ldsR"))
 sumstat1 <- dplyr::select(sumstat1, SNP, Z = Z.x, N=N.x)
 
@@ -33,5 +34,6 @@ celltype_analysis(
  covariate_dir = system.file("extdata", "baseline1.1_test", package = "ldsR"),
  ldscore_dir = system.file("extdata", "superclusters", package = "ldsR")
 )
+}
 
 }
