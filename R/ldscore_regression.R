@@ -53,7 +53,9 @@ ldscore <- function(
     x_weighted <- x*initial_w
     y_weighted <- y*initial_w
     jackknife = lstq_jackknife(x = x_weighted, y = y_weighted, n_blocks = n_blocks)
-    extract_jackknife(jackknife, M = M, Nbar = Nbar)
+    res <- extract_jackknife(jackknife, M = M, Nbar = Nbar)
+    res$prop <- prop(jackknife,res$cat,res$tot, Nbar, M = M)
+    res
 
 
   }

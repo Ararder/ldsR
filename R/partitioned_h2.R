@@ -28,7 +28,7 @@
 #'
 #'
 #'
-partitioned_h2 <- function(sumstat, ldscore_dir, weights = NULL, n_blocks=200) {
+partitioned_h2 <- function(sumstat, ldscore_dir, weights = NULL, n_blocks=200, overlapping_annotations=NULL) {
   stopifnot("sumstat has to be a data.frame or tbl" = "data.frame" %in% class(sumstat))
   check_columns(c("SNP", "Z", "N"), sumstat)
 
@@ -59,18 +59,37 @@ partitioned_h2 <- function(sumstat, ldscore_dir, weights = NULL, n_blocks=200) {
 
   res <- ldscore(y = merged$Z^2, x = x, w = merged$L2, N = merged$N, M = as.double(covar_M), n_blocks=n_blocks)
 
+  if(!is.null(overlapping_annotations)) {
+    overlap_res <- overlapping_annotations(ldscore_dir = ldscore_dir, M = covar_M, jknife = res)
+
+    dplyr::tibble(
+      annot = names(res$coef_se),
+      coef = res$coef,
+      coef_se = res$coef_se,
+      z = coef/coef_se,
+      tot = res$tot,
+      tot_se = res$tot_se
+    ) |>
+      dplyr::bind_cols(overlap_res) |>
+      dplyr::arrange(dplyr::desc(z))
+
+  } else {
+
+    dplyr::tibble(
+      annot = names(res$coef_se),
+      coef = res$coef,
+      coef_se = res$coef_se,
+      enrich = res$enrichment,
+      prop = res$M_prop,
+      z = coef/coef_se,
+      tot = res$tot,
+      tot_se = res$tot_se
+    ) |>
+      dplyr::arrange(dplyr::desc(z))
+
+  }
 
 
-  dplyr::tibble(
-    annot = names(res$coef_se),
-    coef = res$coef,
-    coef_se = res$coef_se,
-    enrich = res$enrichment,
-    prop = res$M_prop,
-    z = coef/coef_se,
-    tot = res$tot,
-    tot_se = res$tot_se
-  ) |>
-    dplyr::arrange(dplyr::desc(z))
+
 
 }

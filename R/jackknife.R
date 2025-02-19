@@ -114,9 +114,16 @@ extract_jackknife <- function(jknife, Nbar, M) {
   cat_se = sqrt(diag(cat_cov))
 
 
+
+
+
   tot <- sum(cat)
   tot_cov <-  sum(cat_cov)
   tot_se <-  sqrt(tot_cov)
+
+
+
+
 
   M_prop = M / sum(M)
   enrichment = (cat / M) / ( tot / sum(M))
@@ -134,6 +141,70 @@ extract_jackknife <- function(jknife, Nbar, M) {
     tot_cov = tot_cov,
     enrichment = enrichment,
     M_prop = M_prop
+  )
+
+}
+
+prop <- function(jknife,cat,tot, Nbar, M) {
+  # compute proportional estimates
+  n_annot <- length(jknife$est) -1
+  n_blocks <- nrow(jknife$delete_values)
+
+  # no intercept
+  numer_delete_vals <- jknife$delete_values[,-1]
+  for(i in 1:nrow(numer_delete_vals)) numer_delete_vals[i, ] <- (numer_delete_vals[i, ] * M) / Nbar
+  denom_delete_vals <- matrix(rowSums(numer_delete_vals))
+
+
+  denom_delete_vals <- matrix(rep(denom_delete_vals, 53), nrow = 200, ncol = 53, byrow = FALSE)
+  ratio <- cat / tot
+
+  pseudovalues <- matrix(nrow = n_blocks, ncol = n_annot)
+  for(j in 1:n_blocks) {
+    first <- n_blocks * ratio
+    second <- (n_blocks - 1) * numer_delete_vals[j,] / denom_delete_vals[j,]
+    pseudovalues[j,] <-  first - second
+  }
+
+  jackknife <- jackknife(pseudovalues)
+
+  list(
+    prop = ratio,
+    prop_cov = jackknife$cov,
+    prop_se = jackknife$se
+  )
+
+}
+
+overlapping_annotations <- function(ldscore_dirs, M, jknife) {
+  vals <- read_overlap_matrix(ldscore_dirs)
+  overlap_matrix <- vals[["overlap_matrix"]]
+  M_tot <- vals[["M_tot"]]
+  overlap_matrix_prop <- matrix(nrow= nrow(overlap_matrix), ncol = ncol(overlap_matrix))
+  for(i in 1:nrow(overlap_matrix)) {
+    overlap_matrix_prop[i,] <- overlap_matrix[i,] / M
+  }
+
+
+
+  prop_hsq_overlap <- overlap_matrix_prop %*% matrix(jknife$prop$prop, ncol = 1)
+  step1 = overlap_matrix_prop %*% jknife$prop$prop_cov
+  step2 = step1 %*% t(overlap_matrix_prop)
+  prop_hsq_overlap_var <- diag(step2)
+
+  prop_hsq_overlap_se <- sqrt(pmax(prop_hsq_overlap_var,0))
+  prop_M_overlap <- M / M_tot
+  enrichment = prop_hsq_overlap / prop_M_overlap
+  enrichment_se = prop_hsq_overlap_se / prop_M_overlap
+
+
+
+  dplyr::tibble(
+    prop_snps = prop_M_overlap,
+    prop_h2 = drop(prop_hsq_overlap),
+    prop_h2_std_error = prop_hsq_overlap_se,
+    enrich = drop(enrichment),
+    enrich_se = enrichment_se,
   )
 
 }

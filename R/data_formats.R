@@ -39,6 +39,52 @@ parse_gwas <- function(df) {
 
 
 
+# note to self:
+# should be able to take any set of ldscores
+read_overlap_matrix <- function(ldscore_dir, ordered=TRUE) {
+  stopifnot("`ordered` should be either TRUE or FALSE" = rlang::is_bool(ordered))
+
+  if(ordered) {
+    annots <- arrow::read_parquet(fs::path(ldscore_dir, "annot_ref.parquet")) |>
+      dplyr::select(-dplyr::any_of(c("SNP","CM")))
+    freq <- arrow::read_parquet(fs::path(ldscore_dir, "snp_freq.parquet")) |>
+      dplyr::select(-dplyr::any_of(c("SNP")))
+
+    annots <- dplyr::bind_cols(annots, freq) |>
+      dplyr::filter(.data[["MAF"]] > 0.05) |>
+      dplyr::select(-dplyr::any_of(c("MAF")))
+
+  } else {
+    annots <- arrow::read_parquet(fs::path(ldscore_dir, "annot_ref.parquet"))
+    freq <- arrow::read_parquet(fs::path(ldscore_dir, "snp_freq.parquet"))
+    annots <- dplyr::semi_join(annots, dplyr::filter(freq, .data[["MAF"]] > 0.05), by = "SNP")
+    annots <- dplyr::select(annots,-dplyr::any_of(c("SNP", "CM")))
+
+  }
+
+
+  annots
+
+}
+
+create_overlap_matrix <- function(ldscore_dirs) {
+
+  m <- purrr::map(ldscore_dirs, read_overlap_matrix) |>
+    purrr::list_cbind()
+
+
+  overlap <- crossprod(as.matrix(m))
+  M_tot <- nrow(m)
+
+  list("overlap_matrix" = overlap, M_tot = M_tot)
+
+}
+
+
+
+
+
+
 read_celltype_parquet <- function(path) {
   check_is_path(path)
   dset <- arrow::open_dataset(path) |> dplyr::collect()
@@ -61,8 +107,8 @@ parse_parquet_dir <- function(dir) {
   if(ncol(ld) != nrow(annot)+1) {
     stop(cli::format_error(
       "The ldscore files provided do not match up.
-      The number of columns ({.bold {ncol(ld)}} - 1) in {.path {ld_path}} should
-      match the number of rows ({.bold {nrow(annot)}}) in {.path {annot_path}}"
+      The number of columns (ncol = {.bold {ncol(ld)} - 1} ) in {.path {ld_path}} should
+      match the number of rows (nrow = {.bold {nrow(annot)}}) in {.path {annot_path}}"
     )
     )
   }
@@ -86,23 +132,6 @@ parse_parquet_dir <- function(dir) {
 }
 
 
-
-ldsc_to_parquet <- function(dir, annot_name) {
-  ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
-    purrr::map(arrow::read_tsv_arrow, col_select = c("SNP", "L2")) |>
-    purrr::list_rbind() |>
-    purrr::set_names(c("SNP", annot_name))
-
-  m50 <- fs::dir_ls(dir, glob = "*M_5_50") |>
-    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
-    sum()
-  m <- fs::dir_ls(dir, glob = "*M") |>
-    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
-    sum()
-
-  list(ld, m50, m)
-
-}
 
 
 #' Transform LDSC formatted annotation ldscores to ldsR format
@@ -151,3 +180,91 @@ ldsc_to_parquet2 <- function(dir, outdir) {
 
 
 }
+
+
+
+ldsc_to_parquet <- function(dir) {
+  annot_name <- fs::path_file(dir)
+
+  ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
+    purrr::map(arrow::read_tsv_arrow, col_select = c("SNP", "L2")) |>
+    purrr::list_rbind() |>
+    purrr::set_names(c("SNP", annot_name))
+
+  m50 <- fs::dir_ls(dir, glob = "*M_5_50") |>
+    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
+    sum()
+  m <- fs::dir_ls(dir, glob = "*M") |>
+    purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
+    sum()
+
+  annot_ref <-
+    fs::dir_ls(dir, glob = "*annot.gz") |>
+    purrr::map(\(x) arrow::read_tsv_arrow(x, col_select = c(5))) |>
+    purrr::list_rbind() |>
+    purrr::set_names(annot_name)
+
+  list("ld" = ld, "m50" = m50, "m" = m, "annot" = annot_ref)
+
+}
+
+get_snps <- function(dir) {
+
+
+  fs::dir_ls(dir, glob = "*annot.gz") |>
+    purrr::map(\(x) arrow::read_tsv_arrow(x, col_select = c(3) )) |>
+    purrr::list_rbind()
+
+
+}
+
+to_celltype_dataset <- function(parent_dir, outdir) {
+  fs::dir_create(outdir)
+  stopifnot(fs::dir_exists(parent_dir))
+
+  # read in list data
+  list_data <- purrr::map(fs::dir_ls(parent_dir), ldsc_to_parquet, .progress = list(type = "tasks", name = "reading in raw ldscore data"))
+
+  # SNPs should the same in all directories, can get from first directory
+  snps_in_ref <- get_snps(fs::dir_ls(parent_dir)[1])
+
+  # merge LDscore columns ---------------------------------------------------
+
+  all_ld <- purrr::map(list_data, "ld") |>
+    purrr::map(\(x) dplyr::select(x, -1)) |>
+    unname() |>
+    purrr::list_cbind() |>
+    janitor::clean_names()
+
+  snp <- dplyr::select(list_data[[1]][["ld"]], "SNP")
+  all_ld <- dplyr::bind_cols(snp, all_ld)
+
+  # Merge m50 ---------------------------------------------------------------
+
+  all_m50 <- purrr::map(list_data, "m50") |>
+    purrr::imap(\(val, name) dplyr::tibble(annot = fs::path_file(name) |> janitor::make_clean_names(), m50 = val))  |>
+    purrr::list_rbind()
+
+
+  # merge M -----------------------------------------------------------------
+
+  all_m <- purrr::map(list_data, "m") |>
+    purrr::imap(\(val, name) dplyr::tibble(annot = fs::path_file(name) |> janitor::make_clean_names(), m = val))  |>
+    purrr::list_rbind()
+
+  # merge annot_ref ---------------------------------------------------------
+  # bind_cols, and then
+  annot_ref <- purrr::map(list_data, "annot") |>
+    unname() |>
+    purrr::list_cbind()
+  annot_ref <- dplyr::bind_cols(snps_in_ref, annot_ref)
+
+
+
+  annot <- dplyr::inner_join(all_m50, all_m, by = "annot")
+  arrow::write_parquet(annot, fs::path(outdir, "annot.parquet"))
+  arrow::write_parquet(all_ld, fs::path(outdir, "ld.parquet"))
+  arrow::write_parquet(annot_ref, fs::path(outdir, "annot_ref.parquet"))
+
+}
+

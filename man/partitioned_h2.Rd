@@ -4,7 +4,13 @@
 \alias{partitioned_h2}
 \title{Estimate partitioned SNP heritability}
 \usage{
-partitioned_h2(sumstat, ldscore_dir, weights = NULL, n_blocks = 200)
+partitioned_h2(
+  sumstat,
+  ldscore_dir,
+  weights = NULL,
+  n_blocks = 200,
+  overlapping_annotations = NULL
+)
 }
 \arguments{
 \item{sumstat}{A \code{\link[dplyr:reexports]{dplyr::tibble()}} with columns \code{SNP}, \code{Z} and \code{N}}
