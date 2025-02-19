@@ -8,8 +8,8 @@
 <title> • ldsR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="">
 </head>
 <body>
@@ -142,9 +142,9 @@ saved in the <code>trait2</code> column.</p>
 <span><span class="fu"><a href="../reference/ldsc_rg.html">ldsc_rg</a></span><span class="op">(</span><span class="va">sumstat1</span>, <span class="va">sumstats</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 2/3 ETA:  2s | Computing genetic correlations...</span></span>
+<span><span class="co">#&gt; ⠙ 2/3 ETA:  1s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 2/3 ETA: 2s | Computing genetic correlations...</span></span>
+<span><span class="co">#&gt; ⠙ 2/3 ETA: 1s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 14</span></span></span>
 <span><span class="co">#&gt;   trait2    rg  rg_se h2_trait1 h2_trait_se h2_trait2 h2_trait2_se  gcov gcov_se</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -270,15 +270,7 @@ annotations in <code>covariate_dir</code>.</p>
 <span>  <span class="va">sumstat1</span>,</span>
 <span>  covariate_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span>,</span>
 <span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"superclusters"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed 0 rows after merging with ldscores</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
-<span><span class="co">#&gt;   annot                     coef      coef_se enrich   prop      z   tot tot_se</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> amygdala_excitatory    3.02<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 0.000<span style="text-decoration: underline;">000</span>017<span style="text-decoration: underline;">4</span>  0.724 0.112   1.74  0.339 0.036<span style="text-decoration: underline;">1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> astrocyte             -<span style="color: #BB0000;">1.45</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 0.000<span style="text-decoration: underline;">000</span>016<span style="text-decoration: underline;">0</span> -<span style="color: #BB0000;">0.338</span> 0.090<span style="text-decoration: underline;">0</span> -<span style="color: #BB0000;">0.911</span> 0.341 0.038<span style="text-decoration: underline;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> bergmann_glia          4.39<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span> 0.000<span style="text-decoration: underline;">000</span>015<span style="text-decoration: underline;">4</span>  0.101 0.088<span style="text-decoration: underline;">1</span>  0.286 0.346 0.038<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> cerebellar_inhibitory -<span style="color: #BB0000;">1.78</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 0.000<span style="text-decoration: underline;">000</span>013<span style="text-decoration: underline;">9</span> -<span style="color: #BB0000;">0.410</span> 0.087<span style="text-decoration: underline;">4</span> -<span style="color: #BB0000;">1.29</span>  0.343 0.039<span style="text-decoration: underline;">1</span></span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
