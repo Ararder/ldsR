@@ -100,7 +100,6 @@ create_overlap_matrix <- function(ldscore_dirs) {
 parse_parquet_dir <- function(dir, read_ref=FALSE) {
   ld_path <- paste0(dir, "/ld.parquet")
   annot_path <- paste0(dir, "/annot.parquet")
-  annot_ref <- paste0(dir, "/annot_ref.parquet")
   check_is_path(ld_path)
   check_is_path(annot_path)
 
@@ -111,7 +110,7 @@ parse_parquet_dir <- function(dir, read_ref=FALSE) {
   if(isTRUE(read_ref)) {
     annot_ref_path <- paste0(dir, "/annot_ref.parquet")
     check_is_path(annot_ref_path)
-    anot_ref <- arrow::read_parquet(annot_ref_path)
+    annot_ref <- arrow::read_parquet(annot_ref_path)
 
   }
 
