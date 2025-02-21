@@ -285,7 +285,7 @@ to_celltype_dataset <- function(parent_dir, outdir, thin = NULL) {
 #' @param list2 output of [ldsc_to_parquet()] or [parse_parquet_dir()]
 #' @param outdir directory to store merged LD data
 #'
-#' @return
+#' @return NULL
 #' @export
 #'
 #' @examples \dontrun{
