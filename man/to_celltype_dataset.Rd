@@ -4,12 +4,15 @@
 \alias{to_celltype_dataset}
 \title{Convert the output of many LDscores to a single dataframe suitable for ldsR}
 \usage{
-to_celltype_dataset(parent_dir, outdir)
+to_celltype_dataset(parent_dir, outdir, thin = NULL)
 }
 \arguments{
 \item{parent_dir}{a directory with subdirectories containing LDscore data}
 
 \item{outdir}{directory to save the parquet files}
+
+\item{thin}{a character vector of RSIDs corresponding to SNPs used in the
+full dataset used to generate LDscores}
 }
 \description{
 Convert the output of many LDscores to a single dataframe suitable for ldsR

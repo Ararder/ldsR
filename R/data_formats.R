@@ -85,24 +85,35 @@ create_overlap_matrix <- function(ldscore_dirs) {
 
 
 
-read_celltype_parquet <- function(path) {
-  check_is_path(path)
-  dset <- arrow::open_dataset(path) |> dplyr::collect()
-
-  kk <- purrr::map_dbl(colnames(dset)[-1], \(x) dset[["metadata"]][["r"]][["columns"]][[x]][["attributes"]][["m50"]])
-
-
-}
-
-
-parse_parquet_dir <- function(dir) {
+#' Read LDscore format from ldsRs parquet format
+#'
+#' @param dir directory containing the files 'annot.parquet', 'annot_ref.parquet' and 'ld.parquet'
+#' @param read_ref logical, whether to read the reference file 'annot_ref.parquet'
+#'
+#' @return a [list()]
+#' @export
+#'
+#' @examples \dontrun{
+#' files <- parse_parquet_dir("ldscores/atac")
+#' }
+#'
+parse_parquet_dir <- function(dir, read_ref=FALSE) {
   ld_path <- paste0(dir, "/ld.parquet")
   annot_path <- paste0(dir, "/annot.parquet")
+  annot_ref <- paste0(dir, "/annot_ref.parquet")
   check_is_path(ld_path)
   check_is_path(annot_path)
 
+
   ld <- arrow::read_parquet(ld_path)
   annot <- arrow::read_parquet(annot_path)
+
+  if(isTRUE(read_ref)) {
+    annot_ref_path <- paste0(dir, "/annot_ref.parquet")
+    check_is_path(annot_ref_path)
+    anot_ref <- arrow::read_parquet(annot_ref_path)
+
+  }
 
   if(ncol(ld) != nrow(annot)+1) {
     stop(cli::format_error(
@@ -125,65 +136,40 @@ parse_parquet_dir <- function(dir) {
     ))
   }
 
-  list(
-    "ld" = ld,
-    "annot" = annot
-  )
+
+
+  if(isTRUE(read_ref)) {
+    list(
+      "ld" = ld,
+      "annot" = annot,
+      "annot_ref" = annot_ref
+    )
+
+  } else{
+    list(
+      "ld" = ld,
+      "annot" = annot
+    )
+  }
+
+
 }
 
 
 
 
-#' Transform LDSC formatted annotation ldscores to ldsR format
+#' Transform a directory of LDscores to parquet format
 #'
-#' @param dir directory with ldscores in LDSC format
-#' @param outdir directory to save the parquet files
+#' @param dir directory containing the python LDSC ldscore format
+#' @param thin If the --thin flag has been used, provide a character vector of RSIDs for the full dataset used to calculate LDscores
 #'
-#' @return NULL
+#' @return a [list()]
 #' @export
 #'
 #' @examples \dontrun{
-#' ldsc_to_parquet2("path/to/ldsc", "path/to/outdir")
+#' ldsc_to_parquet("/directory/ldsc")
 #' }
-ldsc_to_parquet2 <- function(dir, outdir) {
-  ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
-    purrr::map(arrow::read_tsv_arrow, col_select = -c("CHR", "BP")) |>
-    purrr::list_rbind()
-
-  annot_names <- colnames(ld)[-1]
-
-  m50 <-
-    fs::dir_ls(dir, glob = "*M_5_50") |>
-    purrr::map(\(x) arrow::read_tsv_arrow(x, col_names = FALSE)) |>
-    purrr::list_rbind() |>
-    dplyr::summarise(dplyr::across(dplyr::everything(), sum)) |>
-    purrr::set_names(annot_names) |>
-    tidyr::pivot_longer(dplyr::everything(), names_to = "annot", values_to = "m50")
-
-  m <- fs::dir_ls(dir, glob = "*M") |>
-    purrr::map(\(x) arrow::read_tsv_arrow(x, col_names = FALSE)) |>
-    purrr::list_rbind() |>
-    dplyr::summarise(dplyr::across(dplyr::everything(), sum)) |>
-    purrr::set_names(annot_names) |>
-    tidyr::pivot_longer(dplyr::everything(), names_to = "annot", values_to = "m")
-
-  annot_ref <-
-    fs::dir_ls(dir, glob = "*annot.gz") |>
-    purrr::map(arrow::read_tsv_arrow, col_select = -c("CHR", "BP")) |>
-    purrr::list_rbind()
-
-  annot <- dplyr::inner_join(m50, m, by = "annot")
-
-  arrow::write_parquet(ld, fs::path(outdir, "ld.parquet"))
-  arrow::write_parquet(annot_ref, fs::path(outdir, "annot_ref.parquet"))
-  arrow::write_parquet(annot, fs::path(outdir, "annot.parquet"))
-
-
-}
-
-
-
-ldsc_to_parquet <- function(dir) {
+ldsc_to_parquet <- function(dir, thin=FALSE) {
   annot_name <- fs::path_file(dir)
 
   ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
@@ -198,13 +184,28 @@ ldsc_to_parquet <- function(dir) {
     purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
     sum()
 
-  annot_ref <-
-    fs::dir_ls(dir, glob = "*annot.gz") |>
-    purrr::map(\(x) arrow::read_tsv_arrow(x, col_select = c(5))) |>
-    purrr::list_rbind() |>
-    purrr::set_names(annot_name)
+  annot <- dplyr::tibble(annot = annot_name, m50 = m50, m = m)
 
-  list("ld" = ld, "m50" = m50, "m" = m, "annot" = annot_ref)
+
+  if(!isTRUE(thin)) {
+    annot_ref <-
+      fs::dir_ls(dir, glob = "*annot.gz") |>
+      purrr::map(\(x) arrow::read_tsv_arrow(x, col_select = c(5))) |>
+      purrr::list_rbind() |>
+      purrr::set_names(annot_name)
+
+  } else {
+    annot_ref <-
+      fs::dir_ls(dir, glob = "*annot.gz") |>
+      purrr::map(\(x) arrow::read_tsv_arrow(x)) |>
+      purrr::list_rbind() |>
+      purrr::set_names(annot_name)
+
+  }
+
+
+
+  list("ld" = ld, "annot" = annot, "annot_ref" = annot_ref)
 
 }
 
@@ -222,6 +223,8 @@ get_snps <- function(dir) {
 #'
 #' @param parent_dir a directory with subdirectories containing LDscore data
 #' @param outdir directory to save the parquet files
+#' @param thin a character vector of RSIDs corresponding to SNPs used in the
+#' full dataset used to generate LDscores
 #'
 #' @return NULL
 #' @export
@@ -229,15 +232,19 @@ get_snps <- function(dir) {
 #' @examples \dontrun{
 #' to_celltype_dataset("files/ldsc", "files/ldsc_parquet")
 #' }
-to_celltype_dataset <- function(parent_dir, outdir) {
+to_celltype_dataset <- function(parent_dir, outdir, thin = NULL) {
   fs::dir_create(outdir)
   stopifnot(fs::dir_exists(parent_dir))
 
   # read in list data
-  list_data <- purrr::map(fs::dir_ls(parent_dir), ldsc_to_parquet, .progress = list(type = "tasks", name = "reading in raw ldscore data"))
+  list_data <- purrr::map(fs::dir_ls(parent_dir, type = "dir"),\(x) ldsc_to_parquet(x, thin = thin), .progress = list(type = "tasks", name = "reading in raw ldscore data"))
 
   # SNPs should the same in all directories, can get from first directory
-  snps_in_ref <- get_snps(fs::dir_ls(parent_dir)[1])
+  if(is.null(thin)) {
+    snps_in_ref <- get_snps(fs::dir_ls(parent_dir)[1])
+  } else {
+    snps_in_ref <- dplyr::tibble(SNP = thin)
+  }
 
   # merge LDscore columns ---------------------------------------------------
 
@@ -250,17 +257,9 @@ to_celltype_dataset <- function(parent_dir, outdir) {
   snp <- dplyr::select(list_data[[1]][["ld"]], "SNP")
   all_ld <- dplyr::bind_cols(snp, all_ld)
 
-  # Merge m50 ---------------------------------------------------------------
+  # Merge annot ---------------------------------------------------------------
 
-  all_m50 <- purrr::map(list_data, "m50") |>
-    purrr::imap(\(val, name) dplyr::tibble(annot = fs::path_file(name) |> janitor::make_clean_names(), m50 = val))  |>
-    purrr::list_rbind()
-
-
-  # merge M -----------------------------------------------------------------
-
-  all_m <- purrr::map(list_data, "m") |>
-    purrr::imap(\(val, name) dplyr::tibble(annot = fs::path_file(name) |> janitor::make_clean_names(), m = val))  |>
+  annot <- purrr::map(list_data, "annot") |>
     purrr::list_rbind()
 
   # merge annot_ref ---------------------------------------------------------
@@ -271,11 +270,45 @@ to_celltype_dataset <- function(parent_dir, outdir) {
   annot_ref <- dplyr::bind_cols(snps_in_ref, annot_ref)
 
 
-
-  annot <- dplyr::inner_join(all_m50, all_m, by = "annot")
   arrow::write_parquet(annot, fs::path(outdir, "annot.parquet"))
   arrow::write_parquet(all_ld, fs::path(outdir, "ld.parquet"))
   arrow::write_parquet(annot_ref, fs::path(outdir, "annot_ref.parquet"))
 
 }
+
+
+
+
+#' Merge two sets of LD data, and save to parquet
+#'
+#' @param list1 output of [ldsc_to_parquet()] or [parse_parquet_dir()]
+#' @param list2 output of [ldsc_to_parquet()] or [parse_parquet_dir()]
+#' @param outdir directory to store merged LD data
+#'
+#' @return
+#' @export
+#'
+#' @examples \dontrun{
+#' combe_ld_data(l1, l2, "path/to/storage")
+#' }
+combine_ld_data <- function(list1, list2, outdir) {
+  stopifnot(all(names(list1) == names(list2)))
+
+  ld <-  dplyr::bind_cols(list1$ld, dplyr::select(list2$ld, -dplyr::any_of(c("SNP"))))
+  annot <- dplyr::bind_rows(list1$annot, list2$annot)
+  annot_ref <- dplyr::bind_cols(list1$annot_ref, dplyr::select(list2$annot_ref, -dplyr::any_of(c("SNP"))))
+
+
+  ld_path <- paste0(outdir, "/ld.parquet")
+  annot_path <- paste0(outdir, "/annot.parquet")
+  ref_path <- paste0(outdir, "/annot_ref.parquet")
+
+
+  arrow::write_parquet(ld, ld_path)
+  arrow::write_parquet(annot, annot_path)
+  arrow::write_parquet(annot_ref, ref_path)
+
+
+}
+
 

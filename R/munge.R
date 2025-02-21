@@ -19,7 +19,7 @@
 #' @export
 #'
 #' @examples \dontrun{
-#' parse_gwas(tbl)
+#' munge(tbl)
 #' }
 munge <- function(dset, info_filter = 0.9, eaf_filter = 0.01) {
   stopifnot("data.frame" %in% class(dset))

@@ -30,6 +30,6 @@ a data.frame
 }
 \examples{
 \dontrun{
-parse_gwas(tbl)
+munge(tbl)
 }
 }
