@@ -245,13 +245,17 @@ to_celltype_dataset <- function(parent_dir, outdir, thin = NULL) {
     snps_in_ref <- dplyr::tibble(SNP = thin)
   }
 
+  lengths <- purrr::map_dbl(list_data, \(x) nrow(x$ld))
+  cli::cli_inform("{sum(lengths == max(lengths))} had the same number of SNPs out of {length(lengths)}")
+  ls <- list_data
+  list_data <- list_data[lengths == max(lengths)]
+
   # merge LDscore columns ---------------------------------------------------
 
   all_ld <- purrr::map(list_data, "ld") |>
     purrr::map(\(x) dplyr::select(x, -1)) |>
     unname() |>
-    purrr::list_cbind() |>
-    janitor::clean_names()
+    purrr::list_cbind()
 
   snp <- dplyr::select(list_data[[1]][["ld"]], "SNP")
   all_ld <- dplyr::bind_cols(snp, all_ld)
@@ -263,7 +267,7 @@ to_celltype_dataset <- function(parent_dir, outdir, thin = NULL) {
 
   # merge annot_ref ---------------------------------------------------------
   # bind_cols, and then
-  annot_ref <- purrr::map(list_data, "annot") |>
+  annot_ref <- purrr::map(list_data, "annot_ref") |>
     unname() |>
     purrr::list_cbind()
   annot_ref <- dplyr::bind_cols(snps_in_ref, annot_ref)

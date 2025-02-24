@@ -1,7 +1,7 @@
 Package: ldsR
 Type: Package
 Title: An R implementation of LDscore regression (LDSC)
-Version: 0.1.0
+Version: 0.2.0
 Author: Arvid harder
 Maintainer: Arvid Harder <arvid.harder@gmail.com>
 Description: An implemnentation of the classical LDscore regression software in R. 
@@ -18,7 +18,6 @@ Imports:
     cli,
     dplyr,
     fs,
-    janitor,
     purrr,
     rlang (>= 1.1.0),
     stats,
