@@ -222,8 +222,9 @@ get_snps <- function(dir) {
 #'
 #' @param parent_dir a directory with subdirectories containing LDscore data
 #' @param outdir directory to save the parquet files
-#' @param thin a character vector of RSIDs corresponding to SNPs used in the
-#' full dataset used to generate LDscores
+#' @param ref_snps a character vector of RSIDs corresponding to SNPs used in the
+#' full dataset used to generate LDscores. Provide if --thin-annot has been used
+#' in the LDSC command to generate ldscores
 #'
 #' @return NULL
 #' @export
@@ -231,19 +232,22 @@ get_snps <- function(dir) {
 #' @examples \dontrun{
 #' to_celltype_dataset("files/ldsc", "files/ldsc_parquet")
 #' }
-to_celltype_dataset <- function(parent_dir, outdir, thin = NULL) {
+to_celltype_dataset <- function(parent_dir, outdir, ref_snps = NULL) {
   fs::dir_create(outdir)
   stopifnot(fs::dir_exists(parent_dir))
+
+  # SNPs should the same in all directories, can get from first directory
+  if(is.null(ref_snps)) {
+    snps_in_ref <- get_snps(fs::dir_ls(parent_dir)[1])
+    thin <- FALSE
+  } else {
+    snps_in_ref <- dplyr::tibble(SNP = ref_snps)
+    thin <- TRUE
+  }
 
   # read in list data
   list_data <- purrr::map(fs::dir_ls(parent_dir, type = "dir"),\(x) ldsc_to_parquet(x, thin = thin), .progress = list(type = "tasks", name = "reading in raw ldscore data"))
 
-  # SNPs should the same in all directories, can get from first directory
-  if(is.null(thin)) {
-    snps_in_ref <- get_snps(fs::dir_ls(parent_dir)[1])
-  } else {
-    snps_in_ref <- dplyr::tibble(SNP = thin)
-  }
 
   lengths <- purrr::map_dbl(list_data, \(x) nrow(x$ld))
   cli::cli_inform("{sum(lengths == max(lengths))} had the same number of SNPs out of {length(lengths)}")
