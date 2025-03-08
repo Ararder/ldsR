@@ -3,11 +3,13 @@
 <url><loc>http://arvidharder.com/ldsR/LICENSE-text.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/articles/index.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/articles/ldsR.html</loc></url>
+<url><loc>http://arvidharder.com/ldsR/articles/reference-files.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/authors.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/index.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/celltype_analysis.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/combine_ld_data.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/from_tidyGWAS.html</loc></url>
+<url><loc>http://arvidharder.com/ldsR/reference/get_annot_names.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/index.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/ldsc_h2.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/ldsc_rg.html</loc></url>
@@ -16,7 +18,6 @@
 <url><loc>http://arvidharder.com/ldsR/reference/munge.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/parse_parquet_dir.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/partition_h2.html</loc></url>
-<url><loc>http://arvidharder.com/ldsR/reference/partitioned_h2.html</loc></url>
 <url><loc>http://arvidharder.com/ldsR/reference/to_celltype_dataset.html</loc></url>
 </urlset>
 

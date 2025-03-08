@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ldsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,12 @@
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/ldsR.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/reference-files.html">reference-files</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -76,7 +82,7 @@ trait</p>
 two traits</p>
 <p>4. <code><a href="../reference/munge.html">munge()</a></code> to apply quality control filters to a summary
 statistics file</p>
-<p>6. <code><a href="../reference/partitioned_h2.html">partitioned_h2()</a></code> to estimate partitioned heritability
+<p>6. <code>partitioned_h2()</code> to estimate partitioned heritability
 - OBS, correct enrichemnt estimates for overlapping annotations has not
 yet been implemented.</p>
 </div>
@@ -231,7 +237,7 @@ values.</p>
 <h2 id="partitioned-heritability">Partitioned heritability<a class="anchor" aria-label="anchor" href="#partitioned-heritability"></a>
 </h2>
 <p>To estimate the partitioned heritability,
-<code><a href="../reference/partitioned_h2.html">partitioned_h2()</a></code> is available, which requires the
+<code>partitioned_h2()</code> is available, which requires the
 <code>ldscore_dir</code> argument, a directory containing the
 partitioned ldscore files <code>ld.parquet</code> and
 <code>annot.parquet</code> which has the M50 and M values. OBS, for
@@ -239,19 +245,10 @@ overlapping annotations, the functionality to adjust the enrichment
 estimate has not yet been implemented. Therefore the enrichment estimate
 should not be used.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/partitioned_h2.html">partitioned_h2</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">partitioned_h2</span><span class="op">(</span></span>
 <span>  <span class="va">sumstat1</span>,</span>
 <span>  ldscore_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"baseline1.1_test"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed 449 rows after merging with weights</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removed 5961 rows after merging with ldscores</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
-<span><span class="co">#&gt;   annot                            coef coef_se enrich   prop     z   tot tot_se</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Conserved_LindbladToh.bedL2   8.54<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 2.55<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 18.2   0.021<span style="text-decoration: underline;">2</span>  3.35 0.339 0.038<span style="text-decoration: underline;">0</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> baseL2                        2.65<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 8.51<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span>  0.563 0.827   3.12 0.339 0.038<span style="text-decoration: underline;">0</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> H3K4me1_peaks_Trynka.bedL2    6.92<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span> 4.66<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span>  1.47  0.140   1.48 0.339 0.038<span style="text-decoration: underline;">0</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Coding_UCSC.bedL2            -<span style="color: #BB0000;">2.28</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 1.61<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> -<span style="color: #BB0000;">4.85</span>  0.011<span style="text-decoration: underline;">8</span> -<span style="color: #BB0000;">1.42</span> 0.339 0.038<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="cell-type-analysis">Cell-type analysis<a class="anchor" aria-label="anchor" href="#cell-type-analysis"></a>
