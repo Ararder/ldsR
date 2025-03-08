@@ -39,7 +39,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_parquet_dir</span><span class="op">(</span><span class="va">dir</span>, read_ref <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_parquet_dir</span><span class="op">(</span><span class="va">dir</span>, read_ref <span class="op">=</span> <span class="cn">FALSE</span>, subset_annots <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -52,6 +52,10 @@
 
 <dt id="arg-read-ref">read_ref<a class="anchor" aria-label="anchor" href="#arg-read-ref"></a></dt>
 <dd><p>logical, whether to read the reference file 'annot_ref.parquet'</p></dd>
+
+
+<dt id="arg-subset-annots">subset_annots<a class="anchor" aria-label="anchor" href="#arg-subset-annots"></a></dt>
+<dd><p>Specify a character vector of annotations to read in, if NULL, all annotations are read in</p></dd>
 
 </dl></div>
     <div class="section level2">
