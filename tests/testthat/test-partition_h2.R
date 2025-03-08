@@ -4,8 +4,7 @@ test_that("multiplication works", {
 
   annots <- c("baseL2", "Conserved_LindbladToh.bedL2")
 
-  fs::dir_ls("/Users/arvhar/Downloads/ldsR_ldscores")
-  arrow::read_parquet("/Users/arvhar/Downloads/ldsR_ldscores/baseline1.1/annot.parquet")
+  
 
 
 
@@ -48,6 +47,27 @@ test_that("multiplication works", {
 
 })
 
+# 
+test_that("multiplication works", {
+  skip("only works on local machine") 
+  df <- readr::read_tsv("~/Downloads/eo.sumstats.gz") |> 
+    dplyr::filter(!is.na(Z))
+
+  bl <- "~/Downloads/ldsR_ldscores/baseline1.1"
+  bl_names <- get_annot_names(bl)
+  roadmap <- "~/Downloads/ldsR_ldscores/roadmap2018/"
+  kk <- get_annot_names(roadmap)
 
 
+
+  
+  
+
+  res <- partition_h2(
+    sumstat = df,
+    ldscore_dirs = c(bl, roadmap),
+    subset_annots = c(bl_names, "fetal_brain_female_d_nase")
+  )
+
+})
 

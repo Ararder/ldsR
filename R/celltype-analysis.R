@@ -32,9 +32,7 @@ celltype_analysis <- function(sumstat, covariate_dir, ldscore_dir, weights = NUL
 
 
   if(is.null(weights)) {
-    weights <- arrow::read_parquet(system.file("extdata/eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2_celltype")) |>
-      dplyr::rename(L2 = "L2_celltype") |>
-      dplyr::filter(!is.na(L2))
+    weights <- arrow::read_parquet(system.file("extdata/1000G_Phase3_weights_hm3_no_MHC.parquet", package = "ldsR"))
   }
 
   covars <- parse_parquet_dir(covariate_dir)

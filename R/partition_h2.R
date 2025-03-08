@@ -1,10 +1,13 @@
 utils::globalVariables(c("common"))
 
 #' Flexible partitioning of heritability
-#' @inheritParams partitioned_h2
+#' @description
+#' An R implementation of the LD score regression method to estimate SNP heritability, focusing on partioning heritability across multiple annotations.
+#' 
+#' @inheritParams ldsc_h2
 #' @param ldscore_dirs a list of directories containing ldscore files
-#' @param subset_annots a character vector of annotations to subset the ldscore files
-#'
+#' @param subset_annots a character vector of annotations to subset the ldscore files. Use [get_annot_names()]
+#' @param overlapping_annotations are the annotations overlapping? In such a case, the estimate of the enrichment estimate needs to be adjusted.
 #' @returns a tibble with results
 #' @export
 #'
@@ -30,10 +33,9 @@ partition_h2 <- function(
   purrr::walk(ldscore_dirs, check_is_path)
   stopifnot(is.null(subset_annots) | rlang::is_character(subset_annots))
   stopifnot(rlang::is_scalar_logical(overlapping_annotations))
+
   if(is.null(weights)) {
-    weights <- arrow::read_parquet(system.file("extdata/eur_w_ld.parquet", package = "ldsR"), col_select = c("SNP", "L2_celltype")) |>
-      dplyr::rename(L2 = "L2_celltype") |>
-      dplyr::filter(!is.na(L2))
+    weights <- arrow::read_parquet(system.file("extdata/1000G_Phase3_weights_hm3_no_MHC.parquet", package = "ldsR"))
   }
 
 
@@ -61,6 +63,7 @@ partition_h2 <- function(
   n_before <- nrow(merged)
   merged <- dplyr::inner_join(merged, covar_ld, by = "SNP")
   cli::cli_alert_info("Removed {.bold {n_before - nrow(merged)}} rows after merging with ldscores")
+  cli::cli_alert_success("A total of {nrow(merged)} SNPs remain for the regression model")
 
 
   remove_cols <- unique(c(colnames(sumstat), colnames(weights)))
@@ -101,6 +104,16 @@ partition_h2 <- function(
 
 
 }
+
+#' Print names of annotations in a ldscore fileset
+#' @param ldscore_dir A filepath to a ldscore directory
+#'
+#' @returns a character vector of column names
+#' @export
+#'
+#' @examples \dontrun{
+#' get_annot_names("ldscore/dir/celltypes")
+#' }
 get_annot_names <- function(ldscore_dir) {
   arrow::read_parquet(fs::path(ldscore_dir, "annot.parquet")) |> dplyr::pull(annot)
 }

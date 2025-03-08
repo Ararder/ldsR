@@ -4,3 +4,4 @@
 .Ruserdata
 tests/testthat/fixtures/*
 docs
+inst/doc

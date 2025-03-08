@@ -187,15 +187,27 @@ parse_parquet_dir <- function(dir, read_ref = FALSE, subset_annots = NULL) {
 ldsc_to_parquet <- function(dir, thin=FALSE) {
   annot_name <- fs::path_file(dir)
 
-  ld <- fs::dir_ls(dir, glob = "*ldscore.gz") |>
+  naming <- fs::dir_ls(dir, glob = "*ldscore.gz")[1] |> 
+    fs::path_file() |> 
+    stringr::str_remove(".1.l2.ldscore.gz")
+  
+  paste0(naming, ".1.l2.ldscore.gz")
+  stopifnot(fs::file_exists(fs::path(dir, paste0(naming, ".1.l2.ldscore.gz"))))
+  
+  ld_paths <- fs::path(dir, paste0(naming,".", c(1:22), ".l2.ldscore.gz"))
+  m50_paths <- fs::path(dir, paste0(naming,".", c(1:22), ".l2.M_5_50"))
+  m_paths <- fs::path(dir, paste0(naming,".", c(1:22), ".l2.M"))
+  annot_path <- fs::path(dir, paste0(naming,".", c(1:22), ".annot.gz"))
+
+  ld <- ou |> 
     purrr::map(arrow::read_tsv_arrow, col_select = c("SNP", "L2")) |>
     purrr::list_rbind() |>
     purrr::set_names(c("SNP", annot_name))
 
-  m50 <- fs::dir_ls(dir, glob = "*M_5_50") |>
+  m50 <- m50_paths |>
     purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
     sum()
-  m <- fs::dir_ls(dir, glob = "*M") |>
+  m <- m_paths |>
     purrr::map_dbl(\(x) readLines(x) |> as.numeric()) |>
     sum()
 
@@ -204,14 +216,14 @@ ldsc_to_parquet <- function(dir, thin=FALSE) {
 
   if(!isTRUE(thin)) {
     annot_ref <-
-      fs::dir_ls(dir, glob = "*annot.gz") |>
+      annot_path |>
       purrr::map(\(x) arrow::read_tsv_arrow(x, col_select = c(5))) |>
       purrr::list_rbind() |>
       purrr::set_names(annot_name)
 
   } else {
     annot_ref <-
-      fs::dir_ls(dir, glob = "*annot.gz") |>
+      annot_path |>
       purrr::map(\(x) arrow::read_tsv_arrow(x)) |>
       purrr::list_rbind() |>
       purrr::set_names(annot_name)
@@ -343,4 +355,3 @@ combine_ld_data <- function(list1, list2, ref = TRUE, outdir = NULL) {
     arrow::write_parquet(annot_ref, paste0(outdir, "/annot_ref.parquet"))
   }
 }
-
