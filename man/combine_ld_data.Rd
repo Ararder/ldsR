@@ -2,22 +2,23 @@
 % Please edit documentation in R/data_formats.R
 \name{combine_ld_data}
 \alias{combine_ld_data}
-\title{Merge two sets of LD data, and save to parquet}
+\title{Combine two ldsc_to_parquet outputs}
 \usage{
-combine_ld_data(list1, list2, outdir)
+combine_ld_data(list1, list2, ref = TRUE, outdir = NULL)
 }
 \arguments{
-\item{list1}{output of \code{\link[=ldsc_to_parquet]{ldsc_to_parquet()}} or \code{\link[=parse_parquet_dir]{parse_parquet_dir()}}}
+\item{list1, }{list2 output of ldsc_to_parquet}
 
-\item{list2}{output of \code{\link[=ldsc_to_parquet]{ldsc_to_parquet()}} or \code{\link[=parse_parquet_dir]{parse_parquet_dir()}}}
-
-\item{outdir}{directory to store merged LD data}
+\item{outdir}{if NULL, return the combined data, otherwise save to outdir}
+}
+\value{
+a list or NULL
 }
 \description{
-Merge two sets of LD data, and save to parquet
+Combine two ldsc_to_parquet outputs
 }
 \examples{
 \dontrun{
-combe_ld_data(l1, l2, "path/to/storage")
+combine_ld_data("files/ldsc_parquet/CD4_T_cells", "files/ldsc_parquet/CD8_T_cells")
 }
 }

@@ -89,6 +89,7 @@ create_overlap_matrix <- function(ldscore_dirs) {
 #'
 #' @param dir directory containing the files 'annot.parquet', 'annot_ref.parquet' and 'ld.parquet'
 #' @param read_ref logical, whether to read the reference file 'annot_ref.parquet'
+#' @param subset_annots Specify a character vector of annotations to read in, if NULL, all annotations are read in
 #'
 #' @return a [list()]
 #' @export
@@ -97,22 +98,37 @@ create_overlap_matrix <- function(ldscore_dirs) {
 #' files <- parse_parquet_dir("ldscores/atac")
 #' }
 #'
-parse_parquet_dir <- function(dir, read_ref=FALSE) {
-  ld_path <- paste0(dir, "/ld.parquet")
-  annot_path <- paste0(dir, "/annot.parquet")
+parse_parquet_dir <- function(dir, read_ref = FALSE, subset_annots = NULL) {
+  ld_path <- fs::path(dir, "ld.parquet")
+  annot_path <- fs::path(dir, "annot.parquet")
+  stopifnot(rlang::is_scalar_logical(read_ref))
+  stopifnot(is.null(subset_annots) | rlang::is_character(subset_annots))
   check_is_path(ld_path)
   check_is_path(annot_path)
 
+  # provide an option to only read in a subset of annotations
+  if(!is.null(subset_annots)) {
 
-  ld <- arrow::read_parquet(ld_path)
-  annot <- arrow::read_parquet(annot_path)
+    ld <- arrow::read_parquet(ld_path, col_select = dplyr::any_of(c("SNP", subset_annots)))
+    annot <- arrow::read_parquet(annot_path) |> dplyr::filter(annot %in% subset_annots)
 
-  if(isTRUE(read_ref)) {
-    annot_ref_path <- paste0(dir, "/annot_ref.parquet")
-    check_is_path(annot_ref_path)
-    annot_ref <- arrow::read_parquet(annot_ref_path)
+    if(isTRUE(read_ref)) {
+      check_is_path(paste0(dir, "/annot_ref.parquet"))
+      annot_ref <- arrow::read_parquet(paste0(dir, "/annot_ref.parquet"), col_select = dplyr::any_of(c("SNP", subset_annots)))
 
+    }
+
+  } else {
+    if(isTRUE(read_ref)) {
+      check_is_path(paste0(dir, "/annot_ref.parquet"))
+      annot_ref <- arrow::read_parquet(paste0(dir, "/annot_ref.parquet"))
+
+    }
+
+    ld <- arrow::read_parquet(ld_path)
+    annot <- arrow::read_parquet(annot_path)
   }
+
 
   if(ncol(ld) != nrow(annot)+1) {
     stop(cli::format_error(
@@ -286,36 +302,44 @@ to_celltype_dataset <- function(parent_dir, outdir, ref_snps = NULL) {
 
 
 
-#' Merge two sets of LD data, and save to parquet
+
+#' Combine two ldsc_to_parquet outputs
 #'
-#' @param list1 output of [ldsc_to_parquet()] or [parse_parquet_dir()]
-#' @param list2 output of [ldsc_to_parquet()] or [parse_parquet_dir()]
-#' @param outdir directory to store merged LD data
+#' @param list1, list2 output of ldsc_to_parquet
+#' @param outdir if NULL, return the combined data, otherwise save to outdir
 #'
-#' @return NULL
+#' @return a list or NULL
 #' @export
 #'
 #' @examples \dontrun{
-#' combe_ld_data(l1, l2, "path/to/storage")
+#' combine_ld_data("files/ldsc_parquet/CD4_T_cells", "files/ldsc_parquet/CD8_T_cells")
 #' }
-combine_ld_data <- function(list1, list2, outdir) {
+combine_ld_data <- function(list1, list2, ref = TRUE, outdir = NULL) {
   stopifnot(all(names(list1) == names(list2)))
+  stopifnot(is.null(outdir) | rlang::is_scalar_character(outdir))
+  stopifnot(rlang::is_scalar_logical(ref))
+
 
   ld <-  dplyr::bind_cols(list1$ld, dplyr::select(list2$ld, -dplyr::any_of(c("SNP"))))
   annot <- dplyr::bind_rows(list1$annot, list2$annot)
-  annot_ref <- dplyr::bind_cols(list1$annot_ref, dplyr::select(list2$annot_ref, -dplyr::any_of(c("SNP"))))
 
 
-  ld_path <- paste0(outdir, "/ld.parquet")
-  annot_path <- paste0(outdir, "/annot.parquet")
-  ref_path <- paste0(outdir, "/annot_ref.parquet")
 
 
-  arrow::write_parquet(ld, ld_path)
-  arrow::write_parquet(annot, annot_path)
-  arrow::write_parquet(annot_ref, ref_path)
+  if(is.null(outdir)) {
+    if(ref) {
+      annot_ref <- dplyr::bind_cols(list1$annot_ref, dplyr::select(list2$annot_ref, -dplyr::any_of(c("SNP"))))
+      list("ld" = ld, "annot" = annot, "annot_ref" = annot_ref)
+    } else {
+      list("ld" = ld, "annot" = annot)
+    }
 
 
+  } else {
+    annot_ref <- dplyr::bind_cols(list1$annot_ref, dplyr::select(list2$annot_ref, -dplyr::any_of(c("SNP"))))
+    arrow::write_parquet(ld, paste0(outdir, "/ld.parquet"))
+    arrow::write_parquet(annot, paste0(outdir, "/annot.parquet"))
+    arrow::write_parquet(annot_ref, paste0(outdir, "/annot_ref.parquet"))
+  }
 }
-
 

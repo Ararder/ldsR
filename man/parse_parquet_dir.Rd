@@ -4,12 +4,14 @@
 \alias{parse_parquet_dir}
 \title{Read LDscore format from ldsRs parquet format}
 \usage{
-parse_parquet_dir(dir, read_ref = FALSE)
+parse_parquet_dir(dir, read_ref = FALSE, subset_annots = NULL)
 }
 \arguments{
 \item{dir}{directory containing the files 'annot.parquet', 'annot_ref.parquet' and 'ld.parquet'}
 
 \item{read_ref}{logical, whether to read the reference file 'annot_ref.parquet'}
+
+\item{subset_annots}{Specify a character vector of annotations to read in, if NULL, all annotations are read in}
 }
 \value{
 a \code{\link[=list]{list()}}

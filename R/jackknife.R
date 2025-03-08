@@ -176,10 +176,9 @@ prop <- function(jknife,cat,tot, Nbar, M) {
 
 }
 
-overlapping_annotations <- function(ldscore_dirs, M, jknife) {
-  vals <- read_overlap_matrix(ldscore_dirs)
-  overlap_matrix <- vals[["overlap_matrix"]]
-  M_tot <- vals[["M_tot"]]
+overlapping_annotations <- function(overlap_matrix,M_tot, M, jknife) {
+
+
   overlap_matrix_prop <- matrix(nrow= nrow(overlap_matrix), ncol = ncol(overlap_matrix))
   for(i in 1:nrow(overlap_matrix)) {
     overlap_matrix_prop[i,] <- overlap_matrix[i,] / M
