@@ -305,8 +305,9 @@ to_celltype_dataset <- function(parent_dir, outdir, ref_snps = NULL) {
 
 #' Combine two ldsc_to_parquet outputs
 #'
-#' @param list1, list2 output of ldsc_to_parquet
+#' @param list1,list2 output of ldsc_to_parquet
 #' @param outdir if NULL, return the combined data, otherwise save to outdir
+#' @param ref if TRUE, combine the reference annotations
 #'
 #' @return a list or NULL
 #' @export

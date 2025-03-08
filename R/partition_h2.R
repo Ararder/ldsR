@@ -1,5 +1,16 @@
+utils::globalVariables(c("common"))
 
-
+#' Flexible partitioning of heritability
+#' @inheritParams partitioned_h2
+#' @param ldscore_dirs a list of directories containing ldscore files
+#' @param subset_annots a character vector of annotations to subset the ldscore files
+#'
+#' @returns a tibble with results
+#' @export
+#'
+#' @examples \dontrun{
+#' partition_h2(sumstat, ldscore_dirs, subset_annots = c("L2", "L3"))
+#' }
 partition_h2 <- function(
     sumstat,
     ldscore_dirs,
