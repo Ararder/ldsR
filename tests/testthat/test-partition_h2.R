@@ -50,8 +50,8 @@ test_that("multiplication works", {
 # 
 test_that("multiplication works", {
   skip("only works on local machine") 
-  df <- readr::read_tsv("~/Downloads/eo.sumstats.gz") |> 
-    dplyr::filter(!is.na(Z))
+  # df <- readr::read_tsv("~/Downloads/eo.sumstats.gz") |> 
+  #   dplyr::filter(!is.na(Z))
 
   bl <- "~/Downloads/ldsR_ldscores/baseline1.1"
   bl_names <- get_annot_names(bl)

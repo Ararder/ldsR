@@ -7,8 +7,9 @@
 #' For this analysis, it is useful to adjust for a baseline set of annotations, and then estimate the association for a large set of annotations ("cell-types")
 #'
 #'
-#' @inheritParams partitioned_h2
+#' @inheritParams ldsc_h2
 #' @param covariate_dir a directory containing the files `ld.parquet` and `annot.parquet`
+#' @param ldscore_dir a directory containing the files `ld.parquet` and `annot.parquet`. Each annotation will be executed, while adjusting for all annotations in covariate_dir
 #'
 #' @return a [dplyr::tibble()]
 #' @export

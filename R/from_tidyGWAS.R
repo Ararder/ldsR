@@ -1,5 +1,5 @@
 utils::globalVariables(c("B","SE", "Z"))
-#' Parse GWAS format of [tidyGWAS::tidyGWAS()]
+#' Parse GWAS format of tidyGWAS()
 #'
 #' @param tbl a [dplyr::tibble()]
 #' @param n Column name of sample size, default is "N".

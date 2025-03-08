@@ -11,7 +11,7 @@ celltype_analysis(sumstat, covariate_dir, ldscore_dir, weights = NULL)
 
 \item{covariate_dir}{a directory containing the files \code{ld.parquet} and \code{annot.parquet}}
 
-\item{ldscore_dir}{filepath to a directory with the \code{annot.parquet} and \code{ldscores.parquet} files}
+\item{ldscore_dir}{a directory containing the files \code{ld.parquet} and \code{annot.parquet}. Each annotation will be executed, while adjusting for all annotations in covariate_dir}
 
 \item{weights}{Optional, a data.frame or tbl with columns \code{SNP}, \code{L2}}
 }

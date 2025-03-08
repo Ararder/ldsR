@@ -18,7 +18,7 @@ partition_h2(
 
 \item{ldscore_dirs}{a list of directories containing ldscore files}
 
-\item{subset_annots}{a character vector of annotations to subset the ldscore files}
+\item{subset_annots}{a character vector of annotations to subset the ldscore files. Use \code{\link[=get_annot_names]{get_annot_names()}}}
 
 \item{overlapping_annotations}{are the annotations overlapping? In such a case, the estimate of the enrichment estimate needs to be adjusted.}
 
@@ -30,7 +30,7 @@ partition_h2(
 a tibble with results
 }
 \description{
-Flexible partitioning of heritability
+An R implementation of the LD score regression method to estimate SNP heritability, focusing on partioning heritability across multiple annotations.
 }
 \examples{
 \dontrun{

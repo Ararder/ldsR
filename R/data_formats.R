@@ -199,7 +199,7 @@ ldsc_to_parquet <- function(dir, thin=FALSE) {
   m_paths <- fs::path(dir, paste0(naming,".", c(1:22), ".l2.M"))
   annot_path <- fs::path(dir, paste0(naming,".", c(1:22), ".annot.gz"))
 
-  ld <- ou |> 
+  ld <- ld_paths |> 
     purrr::map(arrow::read_tsv_arrow, col_select = c("SNP", "L2")) |>
     purrr::list_rbind() |>
     purrr::set_names(c("SNP", annot_name))

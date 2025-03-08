@@ -2,7 +2,7 @@
 % Please edit documentation in R/from_tidyGWAS.R
 \name{from_tidyGWAS}
 \alias{from_tidyGWAS}
-\title{Parse GWAS format of \code{\link[tidyGWAS:tidyGWAS]{tidyGWAS::tidyGWAS()}}}
+\title{Parse GWAS format of tidyGWAS()}
 \usage{
 from_tidyGWAS(tbl, n = c("N", "EffectiveN"))
 }
@@ -15,7 +15,7 @@ from_tidyGWAS(tbl, n = c("N", "EffectiveN"))
 a munged \code{\link[dplyr:reexports]{dplyr::tibble()}}
 }
 \description{
-Parse GWAS format of \code{\link[tidyGWAS:tidyGWAS]{tidyGWAS::tidyGWAS()}}
+Parse GWAS format of tidyGWAS()
 }
 \examples{
 \dontrun{

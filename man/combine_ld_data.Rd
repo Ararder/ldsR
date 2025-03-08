@@ -7,7 +7,9 @@
 combine_ld_data(list1, list2, ref = TRUE, outdir = NULL)
 }
 \arguments{
-\item{list1, }{list2 output of ldsc_to_parquet}
+\item{list1, list2}{output of ldsc_to_parquet}
+
+\item{ref}{if TRUE, combine the reference annotations}
 
 \item{outdir}{if NULL, return the combined data, otherwise save to outdir}
 }
