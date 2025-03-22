@@ -199,6 +199,7 @@ overlapping_annotations <- function(overlap_matrix,M_tot, M, jknife) {
 
 
   dplyr::tibble(
+    annot = colnames(overlap_matrix),
     prop_snps = prop_M_overlap,
     prop_h2 = drop(prop_hsq_overlap),
     prop_h2_std_error = prop_hsq_overlap_se,

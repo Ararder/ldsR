@@ -101,6 +101,7 @@ create_overlap_matrix <- function(ldscore_dirs) {
 parse_parquet_dir <- function(dir, read_ref = FALSE, subset_annots = NULL) {
   ld_path <- fs::path(dir, "ld.parquet")
   annot_path <- fs::path(dir, "annot.parquet")
+  annot_ref_path <- paste0(dir, "/annot_ref.parquet")
   stopifnot(rlang::is_scalar_logical(read_ref))
   stopifnot(is.null(subset_annots) | rlang::is_character(subset_annots))
   check_is_path(ld_path)
@@ -113,15 +114,16 @@ parse_parquet_dir <- function(dir, read_ref = FALSE, subset_annots = NULL) {
     annot <- arrow::read_parquet(annot_path) |> dplyr::filter(annot %in% subset_annots)
 
     if(isTRUE(read_ref)) {
-      check_is_path(paste0(dir, "/annot_ref.parquet"))
-      annot_ref <- arrow::read_parquet(paste0(dir, "/annot_ref.parquet"), col_select = dplyr::any_of(c("SNP", subset_annots)))
+      check_is_path(annot_ref_path)
+      annot_ref <- arrow::read_parquet(annot_ref_path, col_select = dplyr::any_of(c("SNP", subset_annots)))
 
     }
 
   } else {
     if(isTRUE(read_ref)) {
-      check_is_path(paste0(dir, "/annot_ref.parquet"))
-      annot_ref <- arrow::read_parquet(paste0(dir, "/annot_ref.parquet"))
+      check_is_path(annot_ref_path)
+
+      annot_ref <- arrow::read_parquet(annot_ref_path)
 
     }
 
@@ -154,6 +156,12 @@ parse_parquet_dir <- function(dir, read_ref = FALSE, subset_annots = NULL) {
 
 
   if(isTRUE(read_ref)) {
+    # check same number of columns
+    if(ncol(ld) != ncol(annot_ref)) {
+      stop(cli::format_error(
+        "{ncol(ld)} columns in {ld_path} does not match {ncol(annot_ref)} columns in {annot_ref_path} "
+      ))
+    }
     list(
       "ld" = ld,
       "annot" = annot,
@@ -187,19 +195,19 @@ parse_parquet_dir <- function(dir, read_ref = FALSE, subset_annots = NULL) {
 ldsc_to_parquet <- function(dir, thin=FALSE) {
   annot_name <- fs::path_file(dir)
 
-  naming <- fs::dir_ls(dir, glob = "*ldscore.gz")[1] |> 
-    fs::path_file() |> 
+  naming <- fs::dir_ls(dir, glob = "*ldscore.gz")[1] |>
+    fs::path_file() |>
     stringr::str_remove(".1.l2.ldscore.gz")
-  
+
   paste0(naming, ".1.l2.ldscore.gz")
   stopifnot(fs::file_exists(fs::path(dir, paste0(naming, ".1.l2.ldscore.gz"))))
-  
+
   ld_paths <- fs::path(dir, paste0(naming,".", c(1:22), ".l2.ldscore.gz"))
   m50_paths <- fs::path(dir, paste0(naming,".", c(1:22), ".l2.M_5_50"))
   m_paths <- fs::path(dir, paste0(naming,".", c(1:22), ".l2.M"))
   annot_path <- fs::path(dir, paste0(naming,".", c(1:22), ".annot.gz"))
 
-  ld <- ld_paths |> 
+  ld <- ld_paths |>
     purrr::map(arrow::read_tsv_arrow, col_select = c("SNP", "L2")) |>
     purrr::list_rbind() |>
     purrr::set_names(c("SNP", annot_name))

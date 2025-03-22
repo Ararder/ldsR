@@ -1,9 +1,9 @@
-utils::globalVariables(c("common"))
+utils::globalVariables(c("common", "enrich"))
 
 #' Flexible partitioning of heritability
 #' @description
 #' An R implementation of the LD score regression method to estimate SNP heritability, focusing on partioning heritability across multiple annotations.
-#' 
+#'
 #' @inheritParams ldsc_h2
 #' @param ldscore_dirs a list of directories containing ldscore files
 #' @param subset_annots a character vector of annotations to subset the ldscore files. Use [get_annot_names()]
@@ -51,6 +51,11 @@ partition_h2 <- function(
     cli::cli_alert_warning("Some annotations were not found; {subset_annots[!subset_annots %in% data$annot$annot]}")
   }
 
+  # check that ordering is the same across the data
+  stopifnot(all(colnames(data[["ld"]])[-1] == data[["annot"]][["annot"]]))
+  if(overlapping_annotations) {
+    stopifnot(all(colnames(data[["annot_ref"]]) == colnames(data[["ld"]])))
+  }
 
 
   covar_ld <- data[["ld"]]
@@ -90,13 +95,13 @@ partition_h2 <- function(
 
     cli::cli_inform("Adjusting enrichment estimates by calculating overlap in annotations")
     freq <- arrow::read_parquet(system.file("extdata/common_snps.parquet", package = "ldsR"))
-    m <- dplyr::bind_cols(data$annot_ref, freq) |> dplyr::filter(common) |> dplyr::select(-dplyr::any_of(c("SNP", "common")))
+    m <-  data[["annot_ref"]][freq$common, -1]
     overlap_matrix <- crossprod(as.matrix(m))
     M_tot <- nrow(m)
     overlap_res <- overlapping_annotations(overlap_matrix = overlap_matrix, M_tot = M_tot, M = covar_M, jknife = res)
 
 
-    dplyr::bind_cols(base_results, overlap_res)
+    dplyr::inner_join(dplyr::select(base_results, -enrich,-prop), overlap_res)
 
   }
 
