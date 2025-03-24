@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   articles/ldsR: ldsR.html
   reference-files: reference-files.html
-last_built: 2025-03-24T16:51Z
+last_built: 2025-03-24T16:57Z
 urls:
   reference: http://arvidharder.com/ldsR/reference
   article: http://arvidharder.com/ldsR/articles
