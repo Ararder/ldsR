@@ -51,9 +51,12 @@ partition_h2 <- function(
     cli::cli_alert_warning("Some annotations were not found; {subset_annots[!subset_annots %in% data$annot$annot]}")
   }
 
+
   # check that ordering is the same across the data
+  data[["annot"]]  <- dplyr::inner_join(dplyr::tibble(annot = colnames(data[["ld"]])[-1]), data[["annot"]], by = "annot")
   stopifnot(all(colnames(data[["ld"]])[-1] == data[["annot"]][["annot"]]))
   if(overlapping_annotations) {
+    data[["annot_ref"]] <- dplyr::select(data[["annot_ref"]], dplyr::all_of(colnames(data[["ld"]])))
     stopifnot(all(colnames(data[["annot_ref"]]) == colnames(data[["ld"]])))
   }
 
@@ -82,7 +85,7 @@ partition_h2 <- function(
 
   base_results <- dplyr::tibble(
     annot = names(res$coef_se), coef = res$coef, coef_se = res$coef_se,
-    enrich = res$enrichment, prop = res$M_prop, z = coef/coef_se, tot = res$tot, tot_se = res$tot_se
+    z = coef/coef_se, tot = res$tot, tot_se = res$tot_se
   ) |>
     dplyr::arrange(dplyr::desc(z))
 
