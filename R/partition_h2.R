@@ -85,7 +85,7 @@ partition_h2 <- function(
 
   base_results <- dplyr::tibble(
     annot = names(res$coef_se), coef = res$coef, coef_se = res$coef_se,
-    z = coef/coef_se, tot = res$tot, tot_se = res$tot_se
+    z = coef/coef_se, tot = res$tot, tot_se = res$tot_se, n_snps = covar_M
   ) |>
     dplyr::arrange(dplyr::desc(z))
 
@@ -104,7 +104,7 @@ partition_h2 <- function(
     overlap_res <- overlapping_annotations(overlap_matrix = overlap_matrix, M_tot = M_tot, M = covar_M, jknife = res)
 
 
-    dplyr::inner_join(dplyr::select(base_results, -enrich,-prop), overlap_res)
+    dplyr::inner_join(base_results, overlap_res)
 
   }
 
