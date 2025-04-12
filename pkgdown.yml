@@ -3,8 +3,9 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   articles/ldsR: ldsR.html
+  articles/partitioning-heritability: partitioning-heritability.html
   reference-files: reference-files.html
-last_built: 2025-03-24T16:57Z
+last_built: 2025-04-12T14:00Z
 urls:
   reference: http://arvidharder.com/ldsR/reference
   article: http://arvidharder.com/ldsR/articles

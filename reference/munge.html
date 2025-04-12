@@ -4,14 +4,14 @@ Deduplication of RSID
 Filter variants on INFO in INFO column is present
 Filter variant on effect allele frequency
 Removes strand ambigious variants
-Removes variants with N &amp;lt; round(stats::quantile(step1$N, 0.9) / 1.5)
+Removes variants with N &amp;lt; round(stats::quantile(N, 0.9) / 1.5)
 
 "><meta property="og:description" content="munge() applies 5 filters (if possible):
 Deduplication of RSID
 Filter variants on INFO in INFO column is present
 Filter variant on effect allele frequency
 Removes strand ambigious variants
-Removes variants with N &amp;lt; round(stats::quantile(step1$N, 0.9) / 1.5)
+Removes variants with N &amp;lt; round(stats::quantile(N, 0.9) / 1.5)
 
 "></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -21,7 +21,7 @@ Removes variants with N &amp;lt; round(stats::quantile(step1$N, 0.9) / 1.5)
 
     <a class="navbar-brand me-2" href="../index.html">ldsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,8 @@ Removes variants with N &amp;lt; round(stats::quantile(step1$N, 0.9) / 1.5)
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/reference-files.html">reference-files</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/partitioning-heritability.html">partitioning-heritability</a></li>
+    <li><a class="dropdown-item" href="../articles/reference-files.html">reference-files</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -56,7 +57,7 @@ Removes variants with N &amp;lt; round(stats::quantile(step1$N, 0.9) / 1.5)
 <li><p>Filter variants on INFO in INFO column is present</p></li>
 <li><p>Filter variant on effect allele frequency</p></li>
 <li><p>Removes strand ambigious variants</p></li>
-<li><p>Removes variants with <code>N &lt; round(stats::quantile(step1$N, 0.9) / 1.5)</code></p></li>
+<li><p>Removes variants with <code>N &lt; round(stats::quantile(N, 0.9) / 1.5)</code></p></li>
 </ol></div>
 
     <div class="section level2">

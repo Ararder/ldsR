@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ldsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,7 +19,8 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/reference-files.html">reference-files</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/partitioning-heritability.html">partitioning-heritability</a></li>
+    <li><a class="dropdown-item" href="../articles/reference-files.html">reference-files</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -36,8 +37,14 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="ldsr">ldsR<a class="anchor" aria-label="anchor" href="#ldsr"></a></h2>
 
+
+
+
+    </div><div class="section level2">
+
+      <h3 id="snp-heritability-and-genetic-correlations">SNP heritability and genetic correlations<a class="anchor" aria-label="anchor" href="#snp-heritability-and-genetic-correlations"></a></h3>
 
 
 
@@ -48,28 +55,10 @@
 
       <dl><dt>
 
-          <code><a href="celltype_analysis.html">celltype_analysis()</a></code>
+          <code><a href="munge.html">munge()</a></code>
 
         </dt>
-        <dd>Perform cell-type analysis using partitioned heritability</dd>
-      </dl><dl><dt>
-
-          <code><a href="combine_ld_data.html">combine_ld_data()</a></code>
-
-        </dt>
-        <dd>Combine two ldsc_to_parquet outputs</dd>
-      </dl><dl><dt>
-
-          <code><a href="from_tidyGWAS.html">from_tidyGWAS()</a></code>
-
-        </dt>
-        <dd>Parse GWAS format of tidyGWAS()</dd>
-      </dl><dl><dt>
-
-          <code><a href="get_annot_names.html">get_annot_names()</a></code>
-
-        </dt>
-        <dd>Print names of annotations in a ldscore fileset</dd>
+        <dd>Munge GWAS summary statistics</dd>
       </dl><dl><dt>
 
           <code><a href="ldsc_h2.html">ldsc_h2()</a></code>
@@ -82,6 +71,75 @@
 
         </dt>
         <dd>Compute the genetic correlation between two traits</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="partition-heritability">Partition Heritability<a class="anchor" aria-label="anchor" href="#partition-heritability"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="partition_h2.html">partition_h2()</a></code>
+
+        </dt>
+        <dd>Flexible partitioning of heritability</dd>
+      </dl><dl><dt>
+
+          <code><a href="celltype_analysis.html">celltype_analysis()</a></code>
+
+        </dt>
+        <dd>Perform cell-type analysis using partitioned heritability</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="helpful-functions">Helpful functions<a class="anchor" aria-label="anchor" href="#helpful-functions"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="liability_h2.html">liability_h2()</a></code>
+
+        </dt>
+        <dd>Convert an estimate of observed-scale heritability to liability scale heritability</dd>
+      </dl><dl><dt>
+
+          <code><a href="calc_effective_n.html">calc_effective_n()</a></code>
+
+        </dt>
+        <dd>Calculate the effective sample size of a case-control GWAS</dd>
+      </dl><dl><dt>
+
+          <code><a href="from_tidyGWAS.html">from_tidyGWAS()</a></code>
+
+        </dt>
+        <dd>Parse GWAS format of <code>tidyGWAS::tidyGWAS()</code></dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="read-and-transform-ldscore-data">Read and transform LDscore data<a class="anchor" aria-label="anchor" href="#read-and-transform-ldscore-data"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="parse_parquet_dir.html">parse_parquet_dir()</a></code>
+
+        </dt>
+        <dd>Read LDscore format from ldsRs parquet format</dd>
       </dl><dl><dt>
 
           <code><a href="ldsc_to_parquet.html">ldsc_to_parquet()</a></code>
@@ -90,36 +148,25 @@
         <dd>Transform a directory of LDscores to parquet format</dd>
       </dl><dl><dt>
 
-          <code><a href="liability_h2.html">liability_h2()</a></code>
-
-        </dt>
-        <dd>Convert an estimate of observed-scale heritability to liability scale heritability</dd>
-      </dl><dl><dt>
-
-          <code><a href="munge.html">munge()</a></code>
-
-        </dt>
-        <dd>Munge GWAS summary statistics</dd>
-      </dl><dl><dt>
-
-          <code><a href="parse_parquet_dir.html">parse_parquet_dir()</a></code>
-
-        </dt>
-        <dd>Read LDscore format from ldsRs parquet format</dd>
-      </dl><dl><dt>
-
-          <code><a href="partition_h2.html">partition_h2()</a></code>
-
-        </dt>
-        <dd>Flexible partitioning of heritability</dd>
-      </dl><dl><dt>
-
           <code><a href="to_celltype_dataset.html">to_celltype_dataset()</a></code>
 
         </dt>
         <dd>Convert the output of many LDscores to a single dataframe suitable for ldsR</dd>
+      </dl><dl><dt>
+
+          <code><a href="get_annot_names.html">get_annot_names()</a></code>
+
+        </dt>
+        <dd>Print names of annotations in a ldscore fileset</dd>
+      </dl><dl><dt>
+
+          <code><a href="combine_ld_data.html">combine_ld_data()</a></code>
+
+        </dt>
+        <dd>Combine two ldsc_to_parquet outputs</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
