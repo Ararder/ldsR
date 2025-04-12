@@ -25,7 +25,7 @@ a data.frame
 \item Filter variants on INFO in INFO column is present
 \item Filter variant on effect allele frequency
 \item Removes strand ambigious variants
-\item Removes variants with \code{N < round(stats::quantile(step1$N, 0.9) / 1.5)}
+\item Removes variants with \code{N < round(stats::quantile(N, 0.9) / 1.5)}
 }
 }
 \examples{

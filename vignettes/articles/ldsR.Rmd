@@ -15,55 +15,99 @@ knitr::opts_chunk$set(
 library(ldsR)
 library(testthat)
 library(fs)
+library(dplyr)
 ```
 
 # Introduction
 
-ldsR exposes five functions:
+ldsR is a R rewrite of the [ldsc](https://github.com/bulik/ldsc)
+software, originally implemented in python 2.7. The aim is to provide a
+significantly simplified user experience.
 
-1\. `celltype_analysis()` to estimate partitioned heritability for many
-annotations one at a time, while adjusting for a common set of
-annotations
+Currently, ldsR is able to reproduce all features of ldsc, except:
 
-2\. `ldsc_h2()` to estimate heritability for a single trait
+1\. LDscore calculation
 
-3\. `ldsc_rg()` to estimate the genetic correlation between two traits
+2\. Quantitative annotations in partitioned heritability.
 
-4\. `munge()` to apply quality control filters to a summary statistics
-file
-
-6\. `partitioned_h2()` to estimate partitioned heritability - OBS,
-correct enrichemnt estimates for overlapping annotations has not yet
-been implemented.
-
-# Use ldsR to directly estimate heritability inside R
-
-Estimate heritability with one line inside R.
-
-`ldsc_h2()` has only one required argument, a dataframe with the columns
-`SNP`, `Z` and `N`. The `ref-ld-chr` and `w-ld-chr` files are shipped
-with the ldsR package, but you can also provide your own. By default
-ldsR uses the ldscores derived from the European subset of 1000 Genomes.
+The showcase here is based on a small example file of 100,000 rows, with
+effect sizes from schizophrenia and bipolar disorder.
 
 ```{r}
-# example file, 100 000 rows to be lightweight.
 df <- arrow::read_parquet(system.file("extdata", "sumstats.parquet", package = "ldsR"))
+head(df)
+```
+
+# Munge
+
+To perfectly reproduce LDSC results, the input summary statistics needs
+to filtered in an identical manner. `munge()` mirrors the functionality
+of `munge_sumstats.py`. Munge requires the following columns:
+
+`SNP` `A1` `A2` `Z` `N`
+
+```{r}
+test_df <- mutate(df, A1 = "G", A2 = "T", Z = Z.x, N=N.x)
+test_df <- munge(test_df)
+```
+
+# SNP heritability
+
+`ldsc_h2()` estimates the SNP-heritability for a single trait, one at a
+time. By default, regression weights and LDscores are from the European
+1000G reference panel.
+
+```{r}
+ldsc_h2(test_df)
+```
+
+For binary traits, it's often useful to convert the heritability
+estimate to the liability scale. This can be done using the `pop_prev`
+and `sample_prev` arguments. In this particular case, the N column in
+the example file reflects the total number of cases and controls. In
+such a case, we need both the population prevalence and sample
+prevalence
+
+```{r}
+n_cont <- 77344
+n_cas <- 53300
+s_prev <- n_cas/(n_cas + n_cont)
+ldsc_h2(test_df, pop_prev = 0.01, sample_prev = s_prev)
 
 
-tdf <- dplyr::rename(df, Z = Z.x, N = N.x)
-ldsc_h2(tdf)
+```
+
+Ideally, for estimation of heritability, the per SNP sample size should
+be calculated using the effective sample size summed across cohorts, see
+[here](https://pmc.ncbi.nlm.nih.gov/articles/PMC10066905/). If the N
+column corresponds to the effective sample size, only the `pop_prev`
+argument is required (a 50% sample prevalence is assumed).
+
+```{r}
+eff_n <- calc_effective_n(n_cas, n_cont)
+test_df$N <- eff_n
+ldsc_h2(test_df, pop_prev = 0.01, sample_prev = s_prev)
+```
+
+Lastly, you can estimate the observed scale heritability first, and then
+calculate the liability scale heritability at your convenience using
+`liability_h2()`.
+
+```{r}
+liability_h2(0.37, 0.01, 0.4)
 ```
 
 # Genetic correlations
 
-To calculate the genetic correlation between two traits, pass both
-data.frames to `ldsc_rg()`. Note that there are now five mandatory
-columns in each data.frame:
+ldsR also implements the estimation of genetic correlations in
+`ldsc_rg()`. By default, regression weights and LDscores are from the
+European 1000G reference panel.
 
-`SNP` `Z` `N` `A1` `A2`.
+Technically, `ldsc_h2()` only requires SNP, Z and N. `ldsc_rg()` on the
+other hand requires both `A1` and `A2`, to be able to align Z scores to
+the same reference allele.
 
-`A1` and `A2` are required to align the direction of the `Z` value
-across two summary statistics.
+Using the example data:
 
 ```{r}
 sumstat1 <- dplyr::rename(df, Z = Z.x, N = N.x) |> 
@@ -75,13 +119,13 @@ ldsc_rg(sumstat1, sumstat2)
 
 ```
 
-`ldsc_rg()` provides an interface to easily run make genetic
-correlations with an index trait.
+Additionally, `ldsc_rg()` attemps to make it easier to calculate genetic
+correlations among many traits.
 
-for `sumstats2` you can provide a list of data.frames, and ldsc_rg will
-calculate the genetic correlation with each summary statistic in the
-list. If you provide a named list, the names will be saved in the
-`trait2` column.
+sumstats2 can be both a `dplyr::tibble()`, and a list containing
+multiple `dplyr::tibble()`'s. If a list is passed to the `sumstats2`
+argument, the genetic correlation will be estimated between `sumstats1`
+and all entries in the list.
 
 ```{r}
 sumstats <- list(
@@ -94,73 +138,187 @@ ldsc_rg(sumstat1, sumstats)
         
 ```
 
-# Munge
-
-The `munge()` function can be used to mimic some of the filters of the
-munge_sumstats.py file from ldsc.
+If the list is not named, the names will correspond to the index in the
+list.
 
 ```{r}
-munge(sumstat1)
-```
-
-# The updated ldscore format
-
-ldsR uses an updated format for ldscores, to reduce size and file
-complexity. To run [partitioned_h2()] or [celltype_analysis()], you
-provide a filepath to a directory containing two files: `ld.parquet` and
-`annot.parquet`.
-
-```{r}
-fs::dir_tree(system.file("extdata", "baseline1.1_test", package = "ldsR"))
+sumstats <- list(
+  sumstat2,
+  sumstat2,
+  sumstat2
+)
+          
+ldsc_rg(sumstat1, sumstats)
 
 ```
 
-## ld.parquet
-`ld.parquet` contains the LD scores for each annotation
+# Partitioning heritability
+
+In creating the functions to partition heritability, `ldsR` deviates
+from `ldsc` in the file format used for the partitioned ldscores.
+
+The examples here use a smaller version of the full ldscores, which are
+available [here](https://zenodo.org/records/15194124). The native ldsc
+for partitioned ldscores are available
+[here](https://zenodo.org/records/10515792). The primary difference
+between ldsR and ldsc partitioned ldscores is the number of files. ldsc
+splits out the files across chromosomes and data-type, resulting in 88
+files per ldscore dataset (22 chromosomes, .ldscore, .annot, .m50,
+.m5_50).
+
+ldsR collapses this to three files, in the parquet format.
+
 ```{r}
-arrow::read_parquet(system.file("extdata", "baseline1.1_test/ld.parquet", package = "ldsR")) |> dplyr::slice_head(n = 5)
+dir_tree(system.file("extdata", "superclusters/", package = "ldsR"))
+
 ```
 
-## annot.parquet
-`annot.parquet` contains the annotations and M50 and M values.
+`annot.parquet` contains information on the number of SNPs, ie the M50
+and M5_50 files per annotation
+
 ```{r}
-arrow::read_parquet(system.file("extdata", "baseline1.1_test/annot.parquet", package = "ldsR")) |> dplyr::slice_head(n = 5) 
+arrow::read_parquet(system.file("extdata", "superclusters/annot.parquet", package = "ldsR")) |> 
+  head()
+
 ```
 
-# Partitioned heritability
+`ld.parquet` contains the LDscores per annotation
 
-To estimate the partitioned heritability, `partitioned_h2()` is
-available, which requires the `ldscore_dir` argument, a directory
-containing the partitioned ldscore files `ld.parquet` and
-`annot.parquet` which has the M50 and M values. OBS, for overlapping
-annotations, the functionality to adjust the enrichment estimate has not
-yet been implemented. Therefore the enrichment estimate should not be
-used.
+```{r}
+arrow::read_parquet(system.file("extdata", "superclusters/ld.parquet", package = "ldsR")) |> 
+  head()
+```
+
+`annot_ref.parquet` contains the the SNP to annotation mapping for each
+annotation and SNP that is used to calculate LDscores. It's used when you want 
+to calculate the enrichment of an annotation.
+```{r}
+arrow::read_parquet(system.file("extdata", "superclusters/annot_ref.parquet", package = "ldsR")) |> 
+  head()
+```
+
+
+
+# Partition Heritability
+
+The main function to partition heritability is `partition_h2()`.
+
+1.  `sumstats` is the first argument, corresponding to a dataframe with
+    SNP, Z and N. Use `munge()` first.
+2.  `ldscore_dirs` takes a vector of filepaths, to directories with
+    partitioned ldscores
+3.  `subset_annots` allows for flexible subsetting of annotations to use
+    in the model. Default is NULL; which means that all of the annotions
+    will be used in the model
+4.  `overlapping_annotations` which will result in the enrichment for
+    each annotation also being estimated.
+
+In this first example we estimate the partitioned heritability across
+the 4 of the 53 baseline annotations
+
+```{r}
+# use the dataframe we munged earlier
+
+partition_h2(
+  test_df,
+  ldscore_dirs = system.file("extdata", "baseline1.1_test/", package = "ldsR"),
+)
+
+```
+
+Perhaps we are interested in doing "cell-type analysis", testing the
+enrichment of a specific annotation while adjusting for the 53 baseline
+annotations. With `partition_h2()`, we simply add the filepath to the
+directory with additional ldscores.
+
+Here we use a subsetted example of LDscores derived from human brain
+cell-types.
+
+To be more specific in which LDscores we want to include in the model,
+we need pass a list of annotation names that will be included in the
+model. For this we need to know what the annotation names are per
+ldscore dataset. Here we use `get_annot_names()`, which will simply
+return the names of all annotations in a ldscore dataset.
+
+```{r}
+all_ldscores <- c(
+  system.file("extdata", "baseline1.1_test/", package = "ldsR"), 
+  system.file("extdata", "superclusters/", package = "ldsR")
+  )
+
+baseline_names <- get_annot_names(all_ldscores[1])
+supercluster_names <- get_annot_names(all_ldscores[2])
+
+```
+
+```{r}
+baseline_names
+```
+
+```{r}
+supercluster_names
+```
+
+With this, we specify which annotations to include in the model through
+`subset_annots`.
+
+```{r}
+partition_h2(
+  test_df,
+  ldscore_dirs = all_ldscores,
+  # here we test the association with hippocampal neurons
+  subset_annot = c(baseline_names,"amygdala_excitatory")
+) |> 
+  filter(annot == "amygdala_excitatory")
+```
+
+With this setup we can fit any model we might like, for example by
+adding additional cell-types to run conditional analysis.
+
+```{r}
+partition_h2(
+  test_df,
+  ldscore_dirs = all_ldscores,
+  # here we test the association with hippocampal neurons
+  subset_annot = c(baseline_names,"amygdala_excitatory","astrocyte")
+) |> 
+  filter(annot %in% c("amygdala_excitatory","astrocyte"))
+```
+
+Lastly, we can use `overlapping_annotations=TRUE` to estimate the
+enrichment of each annotation.
 
 ```{r, eval = FALSE}
-partitioned_h2(
-  sumstat1,
-  ldscore_dir = system.file("extdata", "baseline1.1_test", package = "ldsR")
-)
+partition_h2(
+  test_df,
+  ldscore_dirs = all_ldscores,
+  subset_annot = c(baseline_names,"amygdala_excitatory","astrocyte"),
+  overlapping_annotations=TRUE
+) |> 
+  filter(annot %in% c("amygdala_excitatory","astrocyte"))
+
 ```
 
 # Cell-type analysis
 
-Another common usage is a version of partitioned heritability sometimes
-referred to as "cell-type analysis".
+Lastly, `celltype_analysis()` is a convenience function for estimating
+the association across several annotations, while adjusting for a set of
+"baseline" annotations.
 
-For [celltype_analysis()] one extra argument is required:
-`covariate_dir`. `covariate_dir` will be used to read in a set of
-LDscores that will be used as covariates when estimating heritability
-enrichment. The ldscores in `ldscores_dir` will be used to estimate the
-enrichment for each annotation, one at a time, while adjusting for *all*
-annotations in `covariate_dir`.
+1.  `sumstat`
+2.  `covariate_dir` filepath to annotations that are used as controls
+3.  `ldscore_dir` filepath to annotations that are to be tested, one at a time
+while adjusting for all annotations in covariate_dir
 
-```{r, eval=FALSE}
+`celltype_analysis()` will loop over each annotation in ldscore_dir, testing it's
+association while adjusting for all annotations in covariate_dir.
+```{r}
 celltype_analysis(
-  sumstat1,
-  covariate_dir = system.file("extdata", "baseline1.1_test", package = "ldsR"),
-  ldscore_dir = system.file("extdata", "superclusters", package = "ldsR")
+  sumstat = test_df,
+  covariate_dir = all_ldscores[1],
+  ldscore_dir = all_ldscores[2]
+  
 )
-
 ```
+
+# 

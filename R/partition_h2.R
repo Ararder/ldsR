@@ -112,16 +112,3 @@ partition_h2 <- function(
 
 
 }
-
-#' Print names of annotations in a ldscore fileset
-#' @param ldscore_dir A filepath to a ldscore directory
-#'
-#' @returns a character vector of column names
-#' @export
-#'
-#' @examples \dontrun{
-#' get_annot_names("ldscore/dir/celltypes")
-#' }
-get_annot_names <- function(ldscore_dir) {
-  arrow::read_parquet(fs::path(ldscore_dir, "annot.parquet")) |> dplyr::pull(annot)
-}

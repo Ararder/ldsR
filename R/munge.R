@@ -6,7 +6,7 @@
 #' 2. Filter variants on INFO in INFO column is present
 #' 3. Filter variant on effect allele frequency
 #' 4. Removes strand ambigious variants
-#' 5. Removes variants with `N < round(stats::quantile(step1$N, 0.9) / 1.5)`
+#' 5. Removes variants with `N < round(stats::quantile(N, 0.9) / 1.5)`
 #'
 #'
 #' @param dset a [dplyr::tibble()] with columns `SNP`, `A1` `A2` `Z` `N` and

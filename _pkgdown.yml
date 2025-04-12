@@ -2,3 +2,31 @@ url: http://arvidharder.com/ldsR/
 template:
   bootstrap: 5
 
+reference:
+- title: ldsR
+
+- subtitle: SNP heritability and genetic correlations
+  contents:
+  - munge
+  - ldsc_h2
+  - ldsc_rg
+
+- subtitle: Partition Heritability
+  contents:
+  - partition_h2
+  - celltype_analysis
+
+- subtitle: Helpful functions
+  contents:
+  - liability_h2
+  - calc_effective_n
+  - from_tidyGWAS
+
+- subtitle: Read and transform LDscore data
+  contents:
+  - parse_parquet_dir
+  - ldsc_to_parquet
+  - to_celltype_dataset
+  - get_annot_names
+  - combine_ld_data
+

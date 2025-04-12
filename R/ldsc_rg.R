@@ -59,13 +59,21 @@ ldsc_rg <- function(sumstats1, sumstats2, weights=NULL, M=NULL, n_blocks=200) {
 
 
   # -------------------------------------------------------------------------
-  if("data.frame" %in% class(sumstats2)) sumstats2 <- list(sumstats2)
+  if("data.frame" %in% class(sumstats2)) {
+
+    .rg(sumstats1, sumstats2=sumstats2, M=M, weights=weights, n_blocks = n_blocks)
+
+  } else {
+
+    purrr::map(
+      sumstats2, \(x) .rg(sumstats1, sumstats2=x, M=M, weights=weights, n_blocks = n_blocks),
+      .progress = list(type = "tasks", name = "Computing genetic correlations...")
+    ) |>
+      purrr::list_rbind(names_to = "trait2")
+
+  }
 
 
-  purrr::map(sumstats2, \(x) .rg(sumstats1, sumstats2=x, M=M, weights=weights, n_blocks = n_blocks),
-    .progress = list(type = "tasks", name = "Computing genetic correlations...")
-  ) |>
-    purrr::list_rbind(names_to = "trait2")
 
 
 }
