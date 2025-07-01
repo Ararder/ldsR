@@ -68,6 +68,10 @@ from_tidyGWAS <- function(tbl, n = c("N", "EffectiveN")) {
 
   } else if(rlang::is_scalar_vector(tbl)) {
 
+    if(fs::path_file(tbl) != "tidyGWAS_hivestyle") {
+      tbl <- fs::path(tbl, "tidyGWAS_hivestyle")
+    }
+
 
     arrow::open_dataset(tbl)  |>
       dplyr::select(

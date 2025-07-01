@@ -24,7 +24,7 @@ Imports:
     rlang (>= 1.1.0),
     stats,
     tidyr
-RoxygenNote: 7.3.2.9000
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/Ararder/ldsR, https://ararder.github.io/ldsR/
 BugReports: https://github.com/Ararder/ldsR/issues
