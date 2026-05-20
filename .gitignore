@@ -5,3 +5,4 @@
 tests/testthat/fixtures/*
 docs
 inst/doc
+.claude
