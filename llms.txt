@@ -1,0 +1,126 @@
+# ldsR
+
+The core functions of the [ldsc python
+package](https://github.com/bulik/ldsc) such as estimating heritability,
+intercept, genetic correlations and partitioned heritability are
+ubiquitous in the analysis of genetic data.
+
+However, the LDSC github is not maintained, and the original python
+version (2.7) id deprecated. Here we introduce the core ldsc algorithms
+rewritten in R and make the most common reference data available within
+the R package making the estimation of genetic correlations,
+heritability, intercept and partitioned heritabiliy easier than ever.
+
+Compare the code to estimate heritability with ldsc using the command
+line interface with ldsR:
+
+``` bash
+# NOTE that these links are no longer valid 
+wget https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2
+wget https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2
+tar -jxvf eur_w_ld_chr.tar.bz2
+unzip -o pgc.cross.scz.zip
+bunzip2 w_hm3.snplist.bz2
+
+munge_sumstats.py \
+--sumstats pgc.cross.SCZ17.2013-05.txt \
+--N 17115 \
+--out scz \
+--merge-alleles w_hm3.snplist
+
+ldsc.py \
+--h2 scz.sumstats.gz \
+--ref-ld-chr eur_w_ld_chr/ \
+--w-ld-chr eur_w_ld_chr/ \
+--out scz
+```
+
+In ldsR, the ldscore data contained in the eur_w_ld_chr folder comes
+with the R package, and the core functions take only a few seconds to
+run on a modern computer.
+
+``` r
+
+library(ldsR)
+sumstats <- readr::read_tsv("my_sumstats.tsv") |>
+    munge()
+h2_res <- ldsc_h2(sumstats)
+
+# estimate rg with itself
+rg_est = ldsc_rg(sumstats, sumstats)
+```
+
+## Installation
+
+You can install the development version of ldsR from
+[GitHub](https://github.com/) with:
+
+``` r
+
+# install.packages("devtools")
+devtools::install_github("Ararder/ldsR")
+```
+
+# Package index
+
+## ldsR
+
+### SNP heritability and genetic correlations
+
+- [`munge()`](https://ararder.github.io/ldsR/reference/munge.md) : Munge
+  GWAS summary statistics
+- [`ldsc_h2()`](https://ararder.github.io/ldsR/reference/ldsc_h2.md) :
+  Estimate SNP heritability using LDscore regression for a single
+  annotation
+- [`ldsc_rg()`](https://ararder.github.io/ldsR/reference/ldsc_rg.md) :
+  Compute the genetic correlation between two traits
+- [`ldsc_h2_diff()`](https://ararder.github.io/ldsR/reference/ldsc_h2_diff.md)
+  : Test whether two SNP heritabilities differ
+- [`ldsc_rg_diff()`](https://ararder.github.io/ldsR/reference/ldsc_rg_diff.md)
+  : Test whether two genetic correlations differ
+
+### Partition Heritability
+
+- [`partition_h2()`](https://ararder.github.io/ldsR/reference/partition_h2.md)
+  : Flexible partitioning of heritability
+- [`celltype_analysis()`](https://ararder.github.io/ldsR/reference/celltype_analysis.md)
+  : Perform cell-type analysis using partitioned heritability
+
+### Helpful functions
+
+- [`liability_h2()`](https://ararder.github.io/ldsR/reference/liability_h2.md)
+  : Convert an estimate of observed-scale heritability to liability
+  scale heritability
+
+- [`calc_effective_n()`](https://ararder.github.io/ldsR/reference/calc_effective_n.md)
+  : Calculate the effective sample size of a case-control GWAS
+
+- [`from_tidyGWAS()`](https://ararder.github.io/ldsR/reference/from_tidyGWAS.md)
+  :
+
+  Parse GWAS format of `tidyGWAS::tidyGWAS()`
+
+- [`to_rsid()`](https://ararder.github.io/ldsR/reference/to_rsid.md) :
+  Map CHR:POS to RSID
+
+### Read and transform LDscore data
+
+- [`parse_parquet_dir()`](https://ararder.github.io/ldsR/reference/parse_parquet_dir.md)
+  : Read LDscore format from ldsRs parquet format
+- [`ldsc_to_parquet()`](https://ararder.github.io/ldsR/reference/ldsc_to_parquet.md)
+  : Transform a directory of LDscores to parquet format
+- [`to_celltype_dataset()`](https://ararder.github.io/ldsR/reference/to_celltype_dataset.md)
+  : Convert the output of many LDscores to a single dataframe suitable
+  for ldsR
+- [`get_annot_names()`](https://ararder.github.io/ldsR/reference/get_annot_names.md)
+  : Print names of annotations in a ldscore fileset
+- [`combine_ld_data()`](https://ararder.github.io/ldsR/reference/combine_ld_data.md)
+  : Combine two ldsc_to_parquet outputs
+
+# Articles
+
+### All vignettes
+
+- [UNKNOWN TITLE](https://ararder.github.io/ldsR/articles/ldsR.md):
+- [partitioning-heritability](https://ararder.github.io/ldsR/articles/partitioning-heritability.md):
+- [reference-files](https://ararder.github.io/ldsR/articles/reference-files.md):

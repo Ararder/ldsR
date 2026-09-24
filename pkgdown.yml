@@ -1,11 +1,11 @@
-pandoc: 3.1.11
-pkgdown: 2.1.1
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   articles/ldsR: ldsR.html
   articles/partitioning-heritability: partitioning-heritability.html
   reference-files: reference-files.html
-last_built: 2025-04-12T14:00Z
+last_built: 2026-09-24T13:21Z
 urls:
-  reference: http://arvidharder.com/ldsR/reference
-  article: http://arvidharder.com/ldsR/articles
+  reference: https://ararder.github.io/ldsR/reference
+  article: https://ararder.github.io/ldsR/articles

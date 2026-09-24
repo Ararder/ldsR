@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title> • ldsR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="">
 </head>
@@ -73,9 +73,6 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:testthat':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     matches</span></span>
 <span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     filter, lag</span></span>
@@ -85,9 +82,8 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>ldsR is a R rewrite of the <a href="https://github.com/bulik/ldsc" class="external-link">ldsc</a> software, originally
-implemented in python 2.7. The aim is to provide a significantly
-simplified user experience.</p>
+<p>ldsR is a R rewrite of the <a href="https://github.com/bulik/ldsc" class="external-link">ldsc</a> software. The aim is to
+provide a significantly simplified user experience.</p>
 <p>Currently, ldsR is able to reproduce all features of ldsc,
 except:</p>
 <p>1. LDscore calculation</p>
@@ -117,7 +113,8 @@ following columns:</p>
 <p><code>SNP</code> <code>A1</code> <code>A2</code> <code>Z</code>
 <code>N</code></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">test_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">df</span>, A1 <span class="op">=</span> <span class="st">"G"</span>, A2 <span class="op">=</span> <span class="st">"T"</span>, Z <span class="op">=</span> <span class="va">Z.x</span>, N<span class="op">=</span><span class="va">N.x</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># create alleles so that we can showcase how munge works</span></span>
+<span><span class="va">test_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">df</span>, A1 <span class="op">=</span> <span class="st">"G"</span>, A2 <span class="op">=</span> <span class="st">"T"</span>, Z <span class="op">=</span> <span class="va">Z.x</span>, N<span class="op">=</span><span class="va">N.x</span><span class="op">)</span></span>
 <span><span class="va">test_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/munge.html">munge</a></span><span class="op">(</span><span class="va">test_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Removed 0 rows after filtering on reference panel</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Removed 0 rows with non-RSIDs in SNP column</span></span>
@@ -131,6 +128,10 @@ following columns:</p>
 <p><code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code> estimates the SNP-heritability for a single
 trait, one at a time. By default, regression weights and LDscores are
 from the European 1000G reference panel.</p>
+<p>The only required argument is the summary statistics. If you want to
+use other regression and LDscore weights (for example from another
+ancestry, you can use the <code>weights</code> argument and the
+<code>M</code> argument).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ldsc_h2.html">ldsc_h2</a></span><span class="op">(</span><span class="va">test_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 6</span></span></span>
@@ -139,9 +140,9 @@ from the European 1000G reference panel.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 0.371 0.035<span style="text-decoration: underline;">8</span>  1.09 0.032<span style="text-decoration: underline;">8</span>      2.14      1.80</span></span></code></pre></div>
 <p>For binary traits, it’s often useful to convert the heritability
 estimate to the liability scale. This can be done using the
-<code>pop_prev</code> and <code>sample_prev</code> arguments. In this
-particular case, the N column in the example file reflects the total
-number of cases and controls. In such a case, we need both the
+<code>pop_prev</code> and <code>sample_prev</code> arguments.</p>
+<p>In this particular case, the N column in the example file reflects
+the total number of cases and controls. In such a case, we need both the
 population prevalence and sample prevalence</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_cont</span> <span class="op">&lt;-</span> <span class="fl">77344</span></span>
@@ -177,12 +178,12 @@ using <code><a href="../reference/liability_h2.html">liability_h2()</a></code>.<
 <h2 id="genetic-correlations">Genetic correlations<a class="anchor" aria-label="anchor" href="#genetic-correlations"></a>
 </h2>
 <p>ldsR also implements the estimation of genetic correlations in
-<code><a href="../reference/ldsc_rg.html">ldsc_rg()</a></code>. By default, regression weights and LDscores are
-from the European 1000G reference panel.</p>
-<p>Technically, <code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code> only requires SNP, Z and N.
-<code><a href="../reference/ldsc_rg.html">ldsc_rg()</a></code> on the other hand requires both <code>A1</code>
-and <code>A2</code>, to be able to align Z scores to the same reference
-allele.</p>
+<code><a href="../reference/ldsc_rg.html">ldsc_rg()</a></code>. Regression weights and LDscores are from the
+European 1000G reference panel, same as with <code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code>.</p>
+<p>Technically, <code><a href="../reference/ldsc_h2.html">ldsc_h2()</a></code> only requires SNP, Z and N.</p>
+<p><code><a href="../reference/ldsc_rg.html">ldsc_rg()</a></code> on the other hand requires both
+<code>A1</code> and <code>A2</code>, to be able to align Z scores to the
+same reference allele.</p>
 <p>Using the example data:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sumstat1</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">df</span>, Z <span class="op">=</span> <span class="va">Z.x</span>, N <span class="op">=</span> <span class="va">N.x</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -214,11 +215,10 @@ list.</p>
 <span>          </span>
 <span><span class="fu"><a href="../reference/ldsc_rg.html">ldsc_rg</a></span><span class="op">(</span><span class="va">sumstat1</span>, <span class="va">sumstats</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  4s | Computing genetic correlations...</span></span>
+<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠙ 1/3 ETA:  4s | Computing genetic correlations...  ⠹ 2/3 ETA:  2s | Computing genetic correlations...  </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
-<span><span class="co">#&gt; ⠹ 2/3 ETA:  2s | Computing genetic correlations...  </span></span>
+<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  <span style="color: #BBBB00;">!</span> 0 SNPs were removed when merging summary statistics</span></span>
+<span><span class="co">#&gt; ⠙ 1/3 ETA:  3s | Computing genetic correlations...  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 14</span></span></span>
 <span><span class="co">#&gt;   trait2    rg  rg_se h2_trait1 h2_trait_se h2_trait2 h2_trait2_se  gcov gcov_se</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -254,17 +254,17 @@ the list.</p>
 <div class="section level2">
 <h2 id="partitioning-heritability">Partitioning heritability<a class="anchor" aria-label="anchor" href="#partitioning-heritability"></a>
 </h2>
-<p>In creating the functions to partition heritability,
-<code>ldsR</code> deviates from <code>ldsc</code> in the file format
-used for the partitioned ldscores.</p>
-<p>The examples here use a smaller version of the full ldscores, which
-are available <a href="https://zenodo.org/records/15194124" class="external-link">here</a>.
-The native ldsc for partitioned ldscores are available <a href="https://zenodo.org/records/10515792" class="external-link">here</a>. The primary
-difference between ldsR and ldsc partitioned ldscores is the number of
-files. ldsc splits out the files across chromosomes and data-type,
-resulting in 88 files per ldscore dataset (22 chromosomes, .ldscore,
+<p><code>ldsR</code> deviates from <code>ldsc</code> in the file format
+used for the partitioned LD scores.</p>
+<p>The example files used below are subset of the full LDscores, which
+are available <a href="https://zenodo.org/records/15194124" class="external-link">here</a>.</p>
+<p>The original baseline annotations in ldsc LDscore format are
+available <a href="https://zenodo.org/records/10515792" class="external-link">here</a>.</p>
+<p>The primary difference between ldsR and ldsc partitioned ldscores is
+the number of files. LDSC splits out the files across chromosomes and
+data-type, resulting in 88 files per data set (22 chromosomes, .ldscore,
 .annot, .m50, .m5_50).</p>
-<p>ldsR collapses this to three files, in the parquet format.</p>
+<p>ldsR collapses this to three files, stored in parquet files.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_tree.html" class="external-link">dir_tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"superclusters/"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">/home/runner/work/_temp/Library/ldsR/extdata/superclusters/</span></span></span>
@@ -274,7 +274,7 @@ resulting in 88 files per ldscore dataset (22 chromosomes, .ldscore,
 <p><code>annot.parquet</code> contains information on the number of
 SNPs, ie the M50 and M5_50 files per annotation</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"superclusters/annot.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<code class="sourceCode R"><span><span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"superclusters/annot.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
 <span><span class="co">#&gt;   annot                    m50       m</span></span>
@@ -296,10 +296,9 @@ SNPs, ie the M50 and M5_50 files per annotation</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> rs1048488                2.77      42.5         0.024                -<span style="color: #BB0000;">0.024</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> rs3115850                2.61      42.0        -<span style="color: #BB0000;">0.025</span>                -<span style="color: #BB0000;">0.105</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> rs2286139                4.08      55.0         0.25                  0.86</span></span></code></pre></div>
-<p><code>annot_ref.parquet</code> contains the the SNP to annotation
-mapping for each annotation and SNP that is used to calculate LDscores.
-It’s used when you want to calculate the enrichment of an
-annotation.</p>
+<p><code>annot_ref.parquet</code> contains the SNP to annotation mapping
+for each annotation.</p>
+<p>A value of 1 means that the SNP is mapped to that annotation.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"superclusters/annot_ref.parquet"</span>, package <span class="op">=</span> <span class="st">"ldsR"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -319,10 +318,6 @@ annotation.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   eccentric_medium_spiny_neuron &lt;int&gt;, ependymal &lt;int&gt;, fibroblast &lt;int&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   hippocampal_ca1_3 &lt;int&gt;, hippocampal_ca4 &lt;int&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   hippocampal_dentate_gyrus &lt;int&gt;, lamp5_lhx6_and_chandelier &lt;int&gt;, …</span></span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="partition-heritability">Partition Heritability<a class="anchor" aria-label="anchor" href="#partition-heritability"></a>
-</h2>
 <p>The main function to partition heritability is
 <code><a href="../reference/partition_h2.html">partition_h2()</a></code>.</p>
 <ol style="list-style-type: decimal">
@@ -341,7 +336,7 @@ of the annotions will be used in the model</li>
 enrichment for each annotation also being estimated.</li>
 </ol>
 <p>In this first example we estimate the partitioned heritability across
-the 4 of the 53 baseline annotations</p>
+the 4 annotations present in this example data.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># use the dataframe we munged earlier</span></span>
 <span></span>
@@ -359,6 +354,8 @@ the 4 of the 53 baseline annotations</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> baseL2                       0.000<span style="text-decoration: underline;">000</span>027<span style="text-decoration: underline;">4</span>    8.79<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span>  3.12 0.350 0.039<span style="text-decoration: underline;">3</span> 5.96<span style="color: #949494;">e</span>6</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> H3K4me1_peaks_Trynka.bedL2   0.000<span style="text-decoration: underline;">000</span>071<span style="text-decoration: underline;">7</span>    4.81<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span>  1.49 0.350 0.039<span style="text-decoration: underline;">3</span> 1.01<span style="color: #949494;">e</span>6</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Coding_UCSC.bedL2           -<span style="color: #BB0000;">0.000</span><span style="color: #BB0000; text-decoration: underline;">000</span><span style="color: #BB0000;">236</span>     1.66<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> -<span style="color: #BB0000;">1.42</span> 0.350 0.039<span style="text-decoration: underline;">3</span> 8.51<span style="color: #949494;">e</span>4</span></span></code></pre></div>
+<p>A common analysis is to estimate the enrichment of a particular
+annotation</p>
 <p>Perhaps we are interested in doing “cell-type analysis”, testing the
 enrichment of a specific annotation while adjusting for the 53 baseline
 annotations. With <code><a href="../reference/partition_h2.html">partition_h2()</a></code>, we simply add the
@@ -481,7 +478,7 @@ annotations in covariate_dir.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
