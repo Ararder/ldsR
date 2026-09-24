@@ -21,6 +21,7 @@ reference:
   - liability_h2
   - calc_effective_n
   - from_tidyGWAS
+  - to_rsid
 
 - subtitle: Read and transform LDscore data
   contents:

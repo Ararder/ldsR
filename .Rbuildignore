@@ -6,3 +6,4 @@
 ^pkgdown$
 ^\.github$
 ^vignettes/articles$
+^data-raw$
